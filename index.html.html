@@ -1,0 +1,1249 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>曼谷跨年共編行程板</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;0,700;1,500&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+
+:root{
+  --bg:#EEF0E4; --surface:#FFFFFF; --surface-2:#F6F7EE; --border:#DCDECB;
+  --text:#1D2B22; --text-muted:#5B6B58; --text-faint:#8A9686;
+  --accent:#C97F1E; --accent-ink:#241A05; --accent2:#C74F68;
+  --shadow:0 1px 2px rgba(30,40,25,.06),0 8px 20px -12px rgba(30,40,25,.18);
+  --river:#14544B;
+  --c-sight:#2C7A8C; --c-food:#C0721F; --c-bar:#6B5CA5; --c-mall:#8C6D1F;
+  --c-market:#A63A2E; --c-spa:#3F7A57; --c-stay:#45608C; --c-flight:#6B6F63;
+  --radius:10px; --radius-sm:6px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1D19; --surface:#16332C; --surface-2:#1B3A32; --border:#2C4A41;
+    --text:#EDEFE2; --text-muted:#A1B3A3; --text-faint:#75897A;
+    --accent:#F0B93E; --accent-ink:#241A05; --accent2:#F0839A;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 24px -12px rgba(0,0,0,.5);
+    --river:#1F6E63;
+    --c-sight:#4FB7CC; --c-food:#F0A85C; --c-bar:#9A8AD1; --c-mall:#C9A94A;
+    --c-market:#E17A63; --c-spa:#8FC2A0; --c-stay:#7FA0D6; --c-flight:#A6ACA0;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1D19; --surface:#16332C; --surface-2:#1B3A32; --border:#2C4A41;
+  --text:#EDEFE2; --text-muted:#A1B3A3; --text-faint:#75897A;
+  --accent:#F0B93E; --accent-ink:#241A05; --accent2:#F0839A;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 24px -12px rgba(0,0,0,.5);
+  --river:#1F6E63;
+  --c-sight:#4FB7CC; --c-food:#F0A85C; --c-bar:#9A8AD1; --c-mall:#C9A94A;
+  --c-market:#E17A63; --c-spa:#8FC2A0; --c-stay:#7FA0D6; --c-flight:#A6ACA0;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Plus Jakarta Sans",system-ui,-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;}
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh;}
+h1,h2,h3{font-family:"Fraunces",Georgia,serif;font-weight:600;text-wrap:balance;margin:0;}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums;}
+button{font-family:inherit;cursor:pointer;}
+input,select,textarea{font-family:inherit;}
+::-webkit-scrollbar{height:10px;width:10px;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px;}
+
+/* header */
+#header{flex:0 0 auto;display:flex;align-items:center;gap:16px;padding:12px 20px;border-bottom:1px solid var(--border);background:var(--surface);}
+.hdr-title{font-size:1.5rem;line-height:1.1;}
+.hdr-sub{font-size:.78rem;color:var(--text-muted);margin-top:2px;}
+.hdr-spacer{flex:1;}
+.status-pill{font-size:.75rem;padding:4px 10px;border-radius:999px;background:var(--surface-2);color:var(--text-muted);display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--text-faint);}
+.status-pill[data-state="saving"] .status-dot{background:var(--accent);animation:pulse 1s infinite;}
+.status-pill[data-state="saved"] .status-dot{background:var(--c-spa);}
+.status-pill[data-state="error"] .status-dot,.status-pill[data-state="readonly"] .status-dot{background:var(--c-market);}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.btn{border:1px solid var(--border);background:var(--surface);color:var(--text);padding:8px 14px;border-radius:var(--radius-sm);font-size:.85rem;font-weight:600;display:inline-flex;align-items:center;gap:6px;transition:background .15s,border-color .15s;}
+.btn:hover{border-color:var(--accent);}
+.btn-primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);}
+.btn-primary:hover{filter:brightness(1.06);}
+.btn-ghost{border-color:transparent;background:transparent;}
+.btn-ghost:hover{background:var(--surface-2);}
+.btn-sm{padding:5px 10px;font-size:.76rem;}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+/* shell */
+.shell{flex:1;display:flex;min-height:0;}
+
+/* app view (front-end, view-only day-by-day) */
+#app-view{display:none;flex:1;min-height:0;overflow-y:auto;padding:16px 18px 40px;}
+#app-view>*{max-width:640px;margin-left:auto;margin-right:auto;}
+#app.view-mode .shell{display:none;}
+#app.view-mode #app-view{display:block;}
+.view-daypills{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 10px;margin-bottom:6px;-webkit-overflow-scrolling:touch;}
+.day-pill{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 13px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);}
+.day-pill-date{font-family:"IBM Plex Mono",monospace;font-size:.78rem;font-weight:700;font-variant-numeric:tabular-nums;}
+.day-pill-wd{font-size:.6rem;font-weight:600;}
+.day-pill.active{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);}
+.view-daynav{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:14px;}
+.view-nav-btn{flex:0 0 auto;width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:1.15rem;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);}
+.view-nav-btn:disabled{opacity:.3;cursor:default;box-shadow:none;}
+.view-daytitle{text-align:center;min-width:150px;}
+.view-date{font-family:"Fraunces",serif;font-size:1.7rem;font-weight:700;line-height:1;}
+.view-weekday{font-size:.8rem;color:var(--text-muted);margin-top:3px;}
+.view-presence{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;}
+.view-presence .avatar{width:24px;height:24px;font-size:.68rem;}
+.view-accom,.view-flight-row{border-radius:var(--radius-sm);padding:9px 13px;font-size:.82rem;margin-bottom:8px;}
+.view-accom{background:color-mix(in srgb, var(--c-stay) 16%, var(--surface));border:1px solid color-mix(in srgb, var(--c-stay) 30%, var(--border));}
+.view-flight-row{background:color-mix(in srgb, var(--c-flight) 14%, var(--surface));border:1px solid color-mix(in srgb, var(--c-flight) 26%, var(--border));}
+.view-flights{margin-bottom:6px;}
+.view-cards{display:flex;flex-direction:column;gap:11px;margin-top:8px;}
+.view-cards .card{cursor:default;}
+.view-cards .card-name{font-size:1rem;}
+.view-cards .card-note{font-size:.8rem;}
+.view-empty{font-size:.85rem;color:var(--text-faint);text-align:center;padding:34px 10px;border:1px dashed var(--border);border-radius:var(--radius-sm);}
+
+/* sidebar */
+#sidebar{width:380px;flex:0 0 auto;border-right:1px solid var(--border);background:var(--surface-2);padding:14px;display:flex;flex-direction:column;gap:10px;overflow:hidden;}
+.sidebar-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.sidebar-head h2{font-size:1.05rem;}
+.search-box{width:100%;padding:8px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:.85rem;flex:0 0 auto;}
+.member-filter-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:0 0 auto;}
+.member-filter-label{font-size:.72rem;font-weight:700;color:var(--text-faint);text-transform:uppercase;letter-spacing:.03em;}
+.member-filter{display:flex;flex-wrap:wrap;gap:5px;flex:0 0 auto;}
+.member-chip{border:1px solid var(--border);background:var(--surface);color:var(--text-muted);font-size:.72rem;padding:4px 9px;border-radius:999px;font-weight:600;}
+.member-chip.active{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);}
+.empty-note{color:var(--text-faint);font-size:.74rem;padding:4px 4px 8px;}
+
+/* sidebar: category rail + panel */
+.sidebar-body{flex:1;display:flex;min-height:0;gap:8px;}
+.cat-rail{width:78px;flex:0 0 auto;display:flex;flex-direction:column;gap:3px;overflow-y:auto;padding-right:2px;}
+.rail-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 3px;border-radius:var(--radius-sm);border:1px solid transparent;background:transparent;color:var(--text-muted);font-size:.66rem;font-weight:700;text-align:center;line-height:1.15;min-height:44px;justify-content:center;}
+.rail-item:hover{background:var(--surface);}
+.rail-item.active{background:var(--surface);border-color:var(--border);color:var(--text);box-shadow:var(--shadow);}
+.rail-item .cat-dot{width:9px;height:9px;border-radius:3px;}
+.rail-item .rail-count{font-size:.6rem;color:var(--text-faint);font-weight:600;}
+.cat-panel{flex:1;min-width:0;overflow-y:auto;display:flex;flex-direction:column;gap:7px;border-radius:var(--radius-sm);}
+.cat-panel.drag-over{outline:2px dashed var(--accent);outline-offset:-4px;background:rgba(0,0,0,.02);}
+.panel-title{font-size:.72rem;font-weight:700;color:var(--text-faint);text-transform:uppercase;letter-spacing:.03em;padding:2px 2px 0;}
+
+/* member manage modal */
+.member-row{display:flex;align-items:center;gap:8px;}
+.member-name-input{flex:1;padding:6px 8px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:.82rem;}
+
+/* card */
+.card{background:var(--surface);border:1px solid var(--border);border-left-width:4px;border-radius:var(--radius-sm);padding:8px 10px;box-shadow:var(--shadow);cursor:grab;position:relative;}
+.card.dragging{opacity:.4;}
+.card-top{display:flex;align-items:flex-start;gap:6px;}
+.card-name{font-size:.85rem;font-weight:700;line-height:1.3;flex:1;}
+.card-confirmed{color:var(--c-spa);font-size:.9rem;flex:0 0 auto;}
+.card-note{font-size:.74rem;color:var(--text-muted);margin-top:3px;line-height:1.4;}
+.card-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;font-size:.72rem;color:var(--text-faint);}
+.card-meta a{color:var(--c-sight);text-decoration:none;font-weight:600;}
+.card-meta a:hover{text-decoration:underline;}
+.card-members{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px;}
+.avatar{width:18px;height:18px;border-radius:50%;color:#fff;font-size:.6rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+.card-actions{position:absolute;top:6px;right:6px;display:flex;gap:3px;opacity:.7;}
+.card:hover .card-actions,.card:focus-within .card-actions{opacity:1;}
+.icon-btn{width:24px;height:24px;border-radius:6px;border:none;background:var(--surface-2);color:var(--text-muted);font-size:.76rem;display:flex;align-items:center;justify-content:center;line-height:1;}
+.icon-btn:hover{background:var(--border);}
+.icon-btn:disabled{opacity:.28;pointer-events:none;}
+.dim{opacity:.32;}
+.card-move-select{width:100%;margin-top:7px;padding:5px 6px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg);color:var(--text-muted);font-size:.72rem;}
+.card-order-controls{display:flex;align-items:center;gap:5px;margin-bottom:5px;}
+.order-badge{font-family:"IBM Plex Mono",monospace;font-size:.68rem;font-weight:700;color:var(--text-muted);background:var(--surface-2);border-radius:5px;padding:1px 7px;min-width:18px;text-align:center;}
+
+/* board */
+#board-scroll{flex:1;overflow-x:auto;overflow-y:hidden;min-width:0;min-height:0;}
+#board-grid{display:grid;height:100%;grid-auto-flow:column;grid-auto-columns:268px;grid-template-rows:44px 1fr;}
+.accom-bar{grid-row:1;margin:6px 3px 0;border-radius:999px;background:var(--c-stay);color:#fff;font-size:.72rem;font-weight:700;display:flex;align-items:center;padding:0 12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.92;}
+.day-col{grid-row:2;min-height:0;border-right:1px solid var(--border);display:flex;flex-direction:column;min-width:0;}
+.day-head{flex:0 0 auto;padding:8px 12px;border-bottom:1px solid var(--border);position:relative;}
+.day-date{font-family:"Fraunces",serif;font-size:1.15rem;font-weight:700;padding-right:52px;}
+.day-weekday{font-size:.72rem;color:var(--text-muted);}
+.day-presence{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px;}
+.day-head-actions{position:absolute;top:6px;right:6px;display:flex;gap:3px;}
+.day-body{flex:1;min-height:0;padding:10px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;}
+.day-body.drag-over{background:var(--surface-2);}
+.drop-placeholder{flex:0 0 auto;min-height:36px;border:2px dashed var(--accent);border-radius:var(--radius-sm);background:color-mix(in srgb, var(--accent) 12%, transparent);}
+.day-empty{font-size:.72rem;color:var(--text-faint);text-align:center;padding:14px 4px;border:1px dashed var(--border);border-radius:var(--radius-sm);}
+.addday-col{grid-row:1/3;display:flex;align-items:center;justify-content:center;}
+
+/* modal */
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,20,15,.45);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px;}
+.modal{background:var(--surface);border-radius:14px;width:100%;max-width:460px;max-height:88vh;overflow-y:auto;padding:20px;box-shadow:var(--shadow);}
+.modal h2{font-size:1.2rem;margin-bottom:14px;}
+.field{margin-bottom:12px;}
+.field-hint{margin:-6px 0 12px;font-size:.76rem;color:var(--text-muted);}
+.field label{display:block;font-size:.76rem;font-weight:700;color:var(--text-muted);margin-bottom:4px;}
+.field input[type=text],.field input[type=date],.field textarea,.field select{width:100%;padding:8px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:.85rem;}
+.field textarea{resize:vertical;min-height:52px;}
+.cat-radio-row{display:flex;flex-wrap:wrap;gap:6px;}
+.cat-radio{display:none;}
+.cat-radio-label{border:1px solid var(--border);border-radius:999px;padding:5px 11px;font-size:.76rem;font-weight:600;display:flex;align-items:center;gap:5px;}
+.cat-radio:checked+.cat-radio-label{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);}
+.member-check-row{display:flex;flex-wrap:wrap;gap:6px;}
+.member-check{display:none;}
+.member-check-label{border:1px solid var(--border);border-radius:999px;padding:4px 10px;font-size:.74rem;font-weight:600;color:var(--text-muted);}
+.member-check:checked+.member-check-label{background:var(--river);border-color:var(--river);color:#fff;}
+.checkbox-row{display:flex;align-items:center;gap:7px;font-size:.8rem;}
+.modal-actions{display:flex;gap:8px;margin-top:16px;}
+.modal-actions .btn-primary{flex:1;justify-content:center;}
+
+/* toast */
+#toast-root{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:60;}
+.toast{background:var(--text);color:var(--bg);font-size:.8rem;padding:9px 16px;border-radius:999px;box-shadow:var(--shadow);}
+
+@media (max-width:760px){
+  #btn-sidebar-toggle{display:inline-flex !important;}
+  #sidebar{position:fixed;left:0;top:0;bottom:0;z-index:40;width:88vw;max-width:360px;transform:translateX(-100%);transition:transform .2s;box-shadow:var(--shadow);}
+  #sidebar.open{transform:translateX(0);}
+  .hdr-sub{display:none;}
+  .hdr-title{font-size:1.1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60vw;}
+  .modal{padding:16px;}
+  #app-view{padding:12px 12px 32px;}
+  .view-date{font-size:1.4rem;}
+  .view-nav-btn{width:44px;height:44px;}
+  .day-pill{min-height:44px;}
+}
+
+</style>
+</head>
+<body>
+
+<div id="app">
+  <header id="header"></header>
+  <div class="shell">
+    <aside id="sidebar"></aside>
+    <div id="board-scroll"><div id="board-grid"></div></div>
+  </div>
+  <div id="app-view"></div>
+</div>
+<div id="modal-root"></div>
+<div id="toast-root"></div>
+<script type="application/json" id="state-data">
+{
+  "trip": {"title":"曼谷跨年共編行程板","start":"2026-12-25","end":"2027-01-03"},
+  "members": [
+    {"id":"m1","name":"Connie"},{"id":"m2","name":"UU"},{"id":"m3","name":"Arrow"},
+    {"id":"m4","name":"Kallen"},{"id":"m5","name":"Fiona"},{"id":"m6","name":"湘梅(Mel)"},
+    {"id":"m7","name":"Coco"},{"id":"m8","name":"小P"},{"id":"m9","name":"Eden"},
+    {"id":"m10","name":"Erica"},{"id":"m11","name":"海哥"},{"id":"m12","name":"曙"},
+    {"id":"m13","name":"順平"},{"id":"m14","name":"Jean"}
+  ],
+  "flights": [
+    {"memberId":"m1","airline":"長榮航空","arrDate":"2026-12-25","arrFlight":"BR075 08:25→11:30","depDate":"2027-01-02","depFlight":"BR076 12:45→17:15"},
+    {"memberId":"m2","airline":"星宇航空","arrDate":"2026-12-25","arrFlight":"JX820 09:25→12:35","depDate":"2027-01-02","depFlight":"JX821 13:45→18:25"},
+    {"memberId":"m3","airline":"星宇航空","arrDate":"2026-12-25","arrFlight":"JX820 09:25→12:35","depDate":"2027-01-02","depFlight":"JX821 13:45→18:25"},
+    {"memberId":"m4","airline":"泰國航空","arrDate":"2026-12-25","arrFlight":"TG633 13:55→16:50","depDate":"2027-01-02","depFlight":"TG636 17:30→22:10"},
+    {"memberId":"m5","airline":"泰國航空","arrDate":"2026-12-25","arrFlight":"TG633 13:55→16:50","depDate":"2027-01-02","depFlight":"TG636 17:30→22:10"},
+    {"memberId":"m6","airline":"泰國航空","arrDate":"2026-12-25","arrFlight":"TG633 13:55→16:50","depDate":"2027-01-02","depFlight":"TG636 17:30→22:10"},
+    {"memberId":"m7","airline":"長榮航空","arrDate":"2026-12-28","arrFlight":"BR075 09:40→12:35","depDate":"2027-01-02","depFlight":"BR076 17:15→21:50"},
+    {"memberId":"m8","airline":"長榮航空","arrDate":"2026-12-28","arrFlight":"BR075 09:40→12:35","depDate":"2027-01-02","depFlight":"BR076 17:15→21:50"},
+    {"memberId":"m9","airline":"星宇航空","arrDate":"2026-12-29","arrFlight":"JX820 09:25→12:35","depDate":"2027-01-02","depFlight":"JX821 13:45→18:25"},
+    {"memberId":"m10","airline":"星宇航空","arrDate":"2026-12-29","arrFlight":"JX820 09:25→12:35","depDate":"2027-01-02","depFlight":"JX821 13:45→18:25"},
+    {"memberId":"m11","airline":"泰國航空","arrDate":"2026-12-30","arrFlight":"TG637 07:55→10:50","depDate":"2027-01-03","depFlight":"TG634 12:40→17:20"},
+    {"memberId":"m12","airline":"泰國航空","arrDate":"2026-12-30","arrFlight":"TG637 07:55→10:50","depDate":"2027-01-03","depFlight":"TG634 12:40→17:20"},
+    {"memberId":"m13","airline":"長榮航空","arrDate":"2026-12-30","arrFlight":"BR075 09:40→12:35","depDate":"2027-01-03","depFlight":"BR076 17:15→21:50"},
+    {"memberId":"m14","airline":"長榮航空","arrDate":"2026-12-30","arrFlight":"BR075 09:40→12:35","depDate":"2027-01-03","depFlight":"BR076 17:15→21:50"}
+  ],
+  "accommodations": [
+    {"id":"a1","name":"Visunee Mansion","checkin":"2026-12-25","checkout":"2026-12-29","address":"Soi Nai Lert, Pathumwan, Bangkok 10330","note":"BTS Phloen Chit 站步行約5分鐘"},
+    {"id":"a2","name":"Bangrak House","checkin":"2026-12-29","checkout":"2027-01-03","address":"522 Thanon Charoen Wiang, Khet Bang Rak, Bangkok 10500","note":"BTS Saphan Taksin 站步行約150公尺"}
+  ],
+  "days": [
+    {"id":"2026-12-25"},{"id":"2026-12-26"},{"id":"2026-12-27"},{"id":"2026-12-28"},{"id":"2026-12-29"},
+    {"id":"2026-12-30"},{"id":"2026-12-31"},{"id":"2027-01-01"},{"id":"2027-01-02"},{"id":"2027-01-03"}
+  ],
+  "cards": [
+    {"id":"cf1","category":"stay","name":"入住 Visunee Mansion","note":"第一段住宿，12/25–12/29","price":"","address":"Soi Nai Lert, Pathumwan, Bangkok 10330","time":"","mapUrl":"","dayId":"2026-12-25","memberIds":[],"confirmed":true},
+    {"id":"cf2","category":"stay","name":"換宿 Bangrak House","note":"退房 Visunee Mansion → 入住 Bangrak House，12/29–1/3","price":"","address":"522 Thanon Charoen Wiang, Khet Bang Rak, Bangkok 10500","time":"","mapUrl":"","dayId":"2026-12-29","memberIds":[],"confirmed":true},
+    {"id":"cf3","category":"bar","name":"跨年晚餐遊船｜河畔嘉年華號","note":"已預訂上層甲板座位，尚未付款。船票通常不可退款，記得盡快確認付款。","price":"฿4,800/人","address":"Riverside Carnival Cruise, Bangkok","time":"21:00–01:00","mapUrl":"","dayId":"2026-12-31","memberIds":[],"confirmed":true},
+
+    {"id":"sight-1","category":"sight","name":"死亡鐵路＋桂河大橋一日遊","note":"三種行程可選：地獄之火通道＋午餐／賽佛瑞野生動物園＋北碧夜市／北碧經典一日遊","price":"約 $1,980–2,586","address":"Kanchanaburi, Thailand","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"sight-2","category":"sight","name":"大城＋美功鐵路＋水上市場一日遊","note":"多種組合：安帕瓦水上市場＋美功鐵道市集／大城世界遺產／丹嫩沙多水上市場，含螢火蟲遊船選項","price":"約 $1,245–2,058","address":"Ayutthaya / Samut Songkhram, Thailand","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"sight-3","category":"sight","name":"泰式烹飪課（黎明寺周邊，中英文可選）","note":"Arun 晨間課程含嘟嘟車導覽和市場觀光，或下午語言班","price":"$528–1,058","address":"Wat Arun, Bangkok","time":"上午班/下午班","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"sight-4","category":"sight","name":"傳統泰服租借體驗（黎明寺）","note":"Sense of Thai：情侶套裝／女士／男士套裝","price":"$673–1,347","address":"Wat Arun, Bangkok","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"sight-5","category":"sight","name":"泰服租借＋攝影師拍攝","note":"服裝租借可加購戶外自助攝影／戶外攝影師／室內攝影師","price":"$2,218–5,014","address":"Bangkok, Thailand","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"sight-6","category":"sight","name":"侏羅紀世界沉浸式體驗展","note":"非尖峰(平日16:00前)較便宜","price":"$704–915","address":"Jurassic World The Exhibition Bangkok","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"sight-7","category":"sight","name":"King Power Mahanakhon SkyWalk＋Skyverse","note":"日間／日落／含I-Tilt 三種套餐","price":"$993–1,254","address":"King Power Mahanakhon, Bangkok","time":"日落場最推","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"sight-8","category":"sight","name":"三頭象神博物館＋暹羅古城76府","note":"含門票＋自助餐（非泰籍旅客）","price":"$770","address":"Erawan Museum / Ancient Siam, Bangkok","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"sight-9","category":"sight","name":"亞洲遊樂園 Skyflyers 高空鞦韆","note":"至少2人成行","price":"$299","address":"Asiatique Sky, Bangkok","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"sight-10","category":"sight","name":"金東尼人妖秀（Golden Dome Cabaret）","note":"VIP座位／豪華座位區","price":"$579–771","address":"Golden Dome Cabaret Show, Bangkok","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"sight-11","category":"sight","name":"Safari World 野生動物園","note":"方案A 野生動物園＋海洋公園＋自助午餐／方案B 海洋公園＋自助午餐","price":"$1,025–1,128","address":"Safari World Bangkok","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"sight-12","category":"sight","name":"大城一日遊：瑪哈泰寺・邦巴茵夏宮","note":"KKday 拚團一日遊，不含門票","price":"$964","address":"Ayutthaya, Thailand","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"sight-13","category":"sight","name":"Rajadamnern 體育場泰拳比賽","note":"二等座（獅子座）門票","price":"$1,296","address":"Rajadamnern Stadium, Bangkok","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"sight-14","category":"sight","name":"Topkart Bangkok 雙人賽車","note":"曼谷人氣卡丁車體驗","price":"$800","address":"Topkart Bangkok","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+
+    {"id":"food-1","category":"food","name":"Vaso - Spanish Tapas Bar","note":"西班牙小食＋夜店般狂熱派對氛圍","price":"約1000/人(無低消)","address":"Thonglor Soi 10, Bangkok","time":"建議21:00場次","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"food-2","category":"food","name":"KHAO (Ekkamai)","note":"米其林星級用餐體驗","price":"約1000/人","address":"15 Ekkamai 10 Alley, Bangkok","time":"晚餐時段","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"food-3","category":"food","name":"Copper Beyond 自助餐（Pinklao / Gaysorn Amarin 兩店）","note":"高級自助餐，嚴選食材","price":"1000–2000/人","address":"The Sense Pinklao, Bangkok","time":"中/晚餐時段","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"food-4","category":"food","name":"Tha Arun 鄭王廟景觀餐廳","note":"鄭王廟正對面河岸景觀","price":"400–600/人","address":"392/61 Phra Nakhon, Bangkok","time":"17:00","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"food-5","category":"food","name":"Crystal Grill（彩虹雲霄酒店82樓）","note":"高空夜景自助餐","price":"1495/人","address":"222 Soi Ratchaprarop 3, Bangkok","time":"18:30–21:30","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"food-6","category":"food","name":"Baan Manee BKK 河景咖啡廳","note":"百年泰式老宅改建，開闊療癒河景","price":"200–600/人","address":"805 Wat Daowaduengsaram, Bangkok","time":"10:00–19:00","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"food-7","category":"food","name":"猛男海鮮（今年重新開店）","note":"貼身猛男熱舞秀","price":"200–400/人","address":"Sena Niwet Soi 125/2, Bangkok","time":"18:00起","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"food-8","category":"food","name":"Here Hai 海鮮（連續6年米其林）","note":"米其林推薦海鮮餐廳","price":"400–600/人","address":"112 Ekkamai Rd, Bangkok","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"food-9","category":"food","name":"Johnny Market（Jeh O Chula媽媽麵）","note":"必吃排隊名店海鮮麵","price":"200–400/人","address":"928 Phra Khanong, Bangkok","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"food-10","category":"food","name":"泰國糖絲餅","note":"道地街頭點心","price":"15–120","address":"Thung Phaya Thai, Ratchathewi, Bangkok","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"food-11","category":"food","name":"福祿雙全（吞武里海鮮市場）","note":"曼谷最大海鮮市場，多間米其林進駐","price":"約1260/人","address":"58 Borommaratchachonnani Rd, Bangkok","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"food-12","category":"food","name":"超爆量蟹肉歐姆蛋","note":"連續3年米其林得獎","price":"400–1000/人","address":"51 Ekkamai 23 Alley, Bangkok","time":"08:00–16:00(一~六)","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"food-13","category":"food","name":"船麵／冰淇淋／海鮮口袋名單","note":"เกศเตี๋ยว船麵、Guss Damn Good冰淇淋、Som Som超人氣海鮮，建議先訂位","price":"","address":"Bangkok, Thailand","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+
+    {"id":"bar-1","category":"bar","name":"Le Du Kaan（帝國大廈55-56樓）","note":"米其林星級主廚操刀","price":"Deluxe 5000/人 或 Counter Bar 1000/人","address":"Empire Tower 55F, Bangkok","time":"傍晚到晚上","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"bar-2","category":"bar","name":"Octave Rooftop Lounge & Bar","note":"曼谷最經典360°天際線，適合大團體看夕陽","price":"1000–2000/人","address":"Bangkok Marriott Hotel Sukhumvit, Bangkok","time":"17:00–19:00夕陽","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"bar-3","category":"bar","name":"Tichuca Rooftop Bar","note":"LED神樹叢林風，網美拍照聖地","price":"600–1200/人","address":"T-One Building 46F, Sukhumvit 40, Bangkok","time":"20:00–22:00","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"bar-4","category":"bar","name":"AETHER Bangkok","note":"Rooftop Club風格，DJ電音夜店氛圍最強","price":"800–1500/人","address":"Central Park Offices 44F, Rama IV Rd Silom, Bangkok","time":"22:00–01:00","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"bar-5","category":"bar","name":"Sky Beach（Mahanakhon 78樓）","note":"曼谷最高人氣觀景酒吧之一，需King Power SkyWalk套票","price":"1000–2000/人","address":"Mahanakhon Tower 78F, Bangkok","time":"17:00–19:00或20:00後","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"bar-6","category":"bar","name":"TRIBE Sky Beach Club（EMSPHERE）","note":"曼谷首間Sky Beach Club，白天泳池、晚上夜店","price":"800–1800/人","address":"EMSPHERE 5F, Sukhumvit Rd, Bangkok","time":"17:30–20:00或22:00後","mapUrl":"","dayId":null,"memberIds":[]},
+
+    {"id":"mall-1","category":"mall","name":"水門時尚白金批發購物中心","note":"便宜好逛，周邊有水門雞飯、船麵等美食","price":"","address":"Pratunam, Bangkok","time":"09:00–20:00","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"mall-2","category":"mall","name":"Asiatique 碼頭夜市","note":"最好逛的文青碼頭夜市，人妖秀/泰拳/摩天輪","price":"","address":"Asiatique The Riverfront, Bangkok","time":"11:00–24:00(建議17:00後)","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"mall-3","category":"mall","name":"丹嫩莎朵水上市場","note":"觀光客較多，建議包車前往","price":"","address":"Damnoen Saduak Floating Market, Bangkok","time":"08:00–16:00","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"mall-4","category":"mall","name":"洽圖洽市集","note":"曼谷尋寶好去處，逾萬個攤位","price":"","address":"Chatuchak Weekend Market, Bangkok","time":"六日09:00–18:00／五18:00–00:00","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"mall-5","category":"mall","name":"美功鐵道市集","note":"火車經過鐵軌兩旁市集，通常與水上市場一起走","price":"","address":"Maeklong Railway Market, Thailand","time":"06:00–18:00","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"mall-6","category":"mall","name":"Big C Supercenter","note":"零食伴手禮泡麵藥妝大採購","price":"","address":"Big C Chit Lom, Bangkok","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"mall-7","category":"mall","name":"曼谷老城區嵩越路","note":"愛迪達現場客製化等特色店家","price":"","address":"Charoen Krung, Bangkok","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"mall-8","category":"mall","name":"ICONSIAM 暹羅天地","note":"河景星巴克、室內大瀑布、室內水上市場與夜市，適合白天躲太陽","price":"","address":"ICONSIAM, Bangkok","time":"10:00–22:00","mapUrl":"","dayId":null,"memberIds":[]},
+
+    {"id":"market-1","category":"market","name":"Jodd Fairs Ratchada","note":"有店面的文青風夜市，火山排骨/現烤海鮮/芒果糯米飯/炸昆蟲","price":"","address":"Jodd Fairs Ratchada, Bangkok","time":"17:00–01:00","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"market-2","category":"market","name":"Train Night Market Srinagarindra","note":"佔地極廣，復古美式風格挖寶","price":"","address":"Train Night Market Srinagarindra, Bangkok","time":"週四-日 17:00–01:00","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"market-3","category":"market","name":"朱拉隆功夜市（Thanon Banthat Thong）","note":"曼谷老字號小吃＋米其林必比登推薦一條街","price":"","address":"Thanon Banthat Thong, Bangkok","time":"每日17:00–23:00","mapUrl":"","dayId":null,"memberIds":[]},
+
+    {"id":"spa-1","category":"spa","name":"Mind n Matter Massage","note":"近 Visunee Mansion，步行約17分／Chit Lom站9分","price":"","address":"Mind n Matter Massage Chidlom, Bangkok","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"spa-2","category":"spa","name":"One More Thai Massage","note":"近 Visunee Mansion，步行約16分／Chit Lom站1分","price":"","address":"One More Thai Spa, Bangkok","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"spa-3","category":"spa","name":"Makkha Health & Spa","note":"近 Visunee Mansion，步行約16分／Phloen Chit站8分","price":"","address":"Makkha Health and Spa, Bangkok","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"spa-4","category":"spa","name":"Wynn Spa","note":"近 Visunee Mansion，步行約10分／Phloen Chit站8分","price":"","address":"Wynn Spa Bangkok","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"spa-5","category":"spa","name":"BRADBURY 世界最響亮的按摩","note":"素坤逸61巷特色按摩體驗，BTS Ekkamai站","price":"","address":"Bradbury Sukhumvit 61, Bangkok","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"spa-6","category":"spa","name":"Nikko Thai Massage","note":"近 Bangrak House，步行約4分鐘","price":"","address":"Nikko Thai Massage, Bangkok","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"spa-7","category":"spa","name":"Baan Bangrak Massage","note":"近 Bangrak House，步行約3分鐘","price":"","address":"Baan Bangrak Massage, Bangkok","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"spa-8","category":"spa","name":"Style Thai Massage","note":"近 Bangrak House，步行約5分鐘","price":"","address":"Style Thai Massage, Bangkok","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"spa-9","category":"spa","name":"CHOKTAWEE THAI MASSAGE","note":"近 Bangrak House，步行約2分鐘","price":"","address":"Choktawee Thai Massage, Bangkok","time":"","mapUrl":"","dayId":null,"memberIds":[]}
+  ]
+}
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+var firebaseConfig = {
+  apiKey: "AIzaSyBh5Kn8NMa1qLZRn2eLH17x_LTZb508eTk",
+  authDomain: "bangkok-nye-trip.firebaseapp.com",
+  projectId: "bangkok-nye-trip",
+  storageBucket: "bangkok-nye-trip.firebasestorage.app",
+  messagingSenderId: "1012615211257",
+  appId: "1:1012615211257:web:759ee06c28e867fdfd5a28",
+  measurementId: "G-0PDWZ53RP4"
+};
+var fbApp = initializeApp(firebaseConfig);
+var db = getFirestore(fbApp);
+var tripRef = doc(db, "trips", "bangkok-nye-trip");
+
+var CATS = {
+  sight:{label:"景點 / 一日遊", short:"景點", key:"sight"},
+  food:{label:"餐廳 / 美食", short:"餐廳", key:"food"},
+  bar:{label:"高空酒吧 / 夜生活", short:"酒吧", key:"bar"},
+  mall:{label:"逛街 / Mall", short:"逛街", key:"mall"},
+  market:{label:"夜市", short:"夜市", key:"market"},
+  spa:{label:"按摩 / 放鬆", short:"按摩", key:"spa"},
+  stay:{label:"住宿", short:"住宿", key:"stay"},
+  flight:{label:"機場 / 交通", short:"交通", key:"flight"}
+};
+var CAT_ORDER = ["sight","food","bar","mall","market","spa","stay","flight"];
+var WEEKDAYS = ["日","一","二","三","四","五","六"];
+
+var state = JSON.parse(document.getElementById("state-data").textContent);
+var uiFilterMembers = [];
+var uiSearch = "";
+var uiActiveCategory = "sight";
+var editingCardId = null;
+var isReadOnly = true;
+var saveTimer = null;
+var dirty = false;
+var resizeTimer = null;
+var uiViewDay = null;
+
+/* ---------- helpers ---------- */
+function $(sel,root){ return (root||document).querySelector(sel); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];}); }
+function uid(prefix){ return prefix + Math.random().toString(36).slice(2,9); }
+function memberById(id){ for(var i=0;i<state.members.length;i++){ if(state.members[i].id===id) return state.members[i]; } return null; }
+function memberInitial(name){ return name.replace(/[()（）]/g,"").slice(0,1); }
+function memberHue(index){ return Math.round(index * (360/Math.max(state.members.length,1))); }
+function memberColor(id){
+  var idx=-1;
+  for(var i=0;i<state.members.length;i++){ if(state.members[i].id===id){ idx=i; break; } }
+  if(idx<0) return "hsl(0 0% 60%)";
+  return "hsl(" + memberHue(idx) + " 42% 42%)";
+}
+function fmtDate(iso){
+  var parts = iso.split("-"); var m=parseInt(parts[1],10), d=parseInt(parts[2],10);
+  return m + "/" + d;
+}
+function weekdayOf(iso){
+  var dt = new Date(iso + "T00:00:00");
+  return WEEKDAYS[dt.getDay()];
+}
+function mapUrl(card){
+  if(card.mapUrl) return card.mapUrl;
+  var q = [card.name, card.address].filter(Boolean).join(" ");
+  if(!q) return "";
+  return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q);
+}
+function sortedDays(){ return state.days.slice().sort(function(a,b){ return a.id<b.id?-1:1; }); }
+function poolCards(){ return state.cards.filter(function(c){ return !c.dayId; }); }
+function cardsForDay(dayId){
+  return state.cards.filter(function(c){ return c.dayId===dayId; })
+    .sort(function(a,b){ return (a.order||0)-(b.order||0); });
+}
+function presentMembersOnDay(iso){
+  var out=[];
+  state.flights.forEach(function(f){
+    if(f.arrDate<=iso && iso<=f.depDate){ out.push(f.memberId); }
+  });
+  return out;
+}
+function accomForDay(iso){
+  for(var i=0;i<state.accommodations.length;i++){
+    var a = state.accommodations[i];
+    if(iso>=a.checkin && iso<a.checkout) return a;
+    if(i===state.accommodations.length-1 && iso===a.checkout) return a;
+  }
+  return null;
+}
+function todayIso(){
+  var d = new Date();
+  function pad(n){ return n<10 ? "0"+n : ""+n; }
+  return d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate());
+}
+function flightsForDay(iso){
+  var arrivals = [], departures = [];
+  state.flights.forEach(function(f){
+    if(f.arrDate===iso) arrivals.push(f);
+    if(f.depDate===iso) departures.push(f);
+  });
+  return {arrivals:arrivals, departures:departures};
+}
+function matchesSearch(card){
+  if(!uiSearch) return true;
+  var hay = (card.name+" "+card.note).toLowerCase();
+  return hay.indexOf(uiSearch.toLowerCase())>=0;
+}
+function matchesMemberFilter(card){
+  if(uiFilterMembers.length===0) return true;
+  return card.memberIds.some(function(id){ return uiFilterMembers.indexOf(id)>=0; });
+}
+
+/* ---------- render: header ---------- */
+function renderHeader(){
+  var h = document.getElementById("header");
+  h.innerHTML =
+    '<div>' +
+      '<div class="hdr-title">'+esc(state.trip.title)+'</div>' +
+      '<div class="hdr-sub">'+fmtDate(state.trip.start)+' – '+fmtDate(state.trip.end)+'　·　'+state.members.length+' 人　·　'+state.cards.length+' 張候選卡片</div>' +
+    '</div>' +
+    '<div class="hdr-spacer"></div>' +
+    '<button class="btn btn-ghost btn-sm" id="btn-mode-toggle">'+(isReadOnly?"✎ 我要編輯":"← 回到前台")+'</button>' +
+    '<div class="status-pill" id="status-pill" data-state="saved"><span class="status-dot"></span><span id="status-text">已同步</span></div>' +
+    (isReadOnly ? "" : '<button class="btn btn-ghost btn-sm" id="btn-sidebar-toggle" style="display:none;">卡片庫</button>');
+  if(!isReadOnly){
+    document.getElementById("btn-sidebar-toggle").addEventListener("click", function(){
+      document.getElementById("sidebar").classList.toggle("open");
+    });
+  }
+  document.getElementById("btn-mode-toggle").addEventListener("click", function(){
+    isReadOnly = !isReadOnly;
+    renderAll();
+  });
+}
+function setStatus(state_, text){
+  var pill = document.getElementById("status-pill");
+  if(!pill) return;
+  pill.setAttribute("data-state", state_);
+  document.getElementById("status-text").textContent = text;
+}
+
+/* ---------- render: card ---------- */
+function cardHtml(card, draggable){
+  var cat = CATS[card.category] || CATS.sight;
+  var mUrl = mapUrl(card);
+  var dim = ((!matchesSearch(card)) || (!matchesMemberFilter(card))) ? " dim" : "";
+  var membersHtml = card.memberIds.map(function(id){
+    var m = memberById(id); if(!m) return "";
+    return '<span class="avatar" style="background:'+memberColor(id)+'" title="'+esc(m.name)+'">'+esc(memberInitial(m.name))+'</span>';
+  }).join("");
+  var metaBits = [];
+  if(card.time) metaBits.push('<span class="mono">'+esc(card.time)+'</span>');
+  if(card.price) metaBits.push('<span class="mono">'+esc(card.price)+'</span>');
+  if(mUrl) metaBits.push('<a href="'+mUrl+'" target="_blank" rel="noopener">📍 地圖</a>');
+  var moveSelect = "";
+  if(!isReadOnly){
+    var dayOpts = '<option value="">尚未排入</option>' + sortedDays().map(function(d){
+      var sel = card.dayId===d.id ? "selected" : "";
+      return '<option value="'+d.id+'" '+sel+'>移到 '+fmtDate(d.id)+' 週'+weekdayOf(d.id)+'</option>';
+    }).join("");
+    moveSelect = '<select class="card-move-select" data-move-id="'+card.id+'">'+dayOpts+'</select>';
+  }
+  var actionsHtml = "";
+  if(!isReadOnly){
+    actionsHtml += '<button class="icon-btn" data-act="edit" data-id="'+card.id+'" title="編輯">✎</button>';
+    if(card.dayId && !card.confirmed){
+      actionsHtml += '<button class="icon-btn" data-act="unschedule" data-id="'+card.id+'" title="移出這天，退回卡片庫（不會刪除資料）">↩</button>';
+    } else if(!card.dayId){
+      actionsHtml += '<button class="icon-btn" data-act="delete" data-id="'+card.id+'" title="從卡片庫永久刪除">✕</button>';
+    }
+  }
+  var orderControls = "";
+  if(card.dayId){
+    var daySibs = cardsForDay(card.dayId);
+    var posIdx = daySibs.findIndex(function(c){ return c.id===card.id; });
+    var posTotal = daySibs.length;
+    if(posTotal>1){
+      orderControls = '<div class="card-order-controls">' +
+        (isReadOnly? "" : '<button class="icon-btn" data-act="moveup" data-id="'+card.id+'" title="在這天往前移一位"'+(posIdx===0?" disabled":"")+'>▲</button>') +
+        '<span class="order-badge" title="這天的第幾個行程">'+(posIdx+1)+' / '+posTotal+'</span>' +
+        (isReadOnly? "" : '<button class="icon-btn" data-act="movedown" data-id="'+card.id+'" title="在這天往後移一位"'+(posIdx===posTotal-1?" disabled":"")+'>▼</button>') +
+      '</div>';
+    }
+  }
+  return (
+    '<div class="card'+dim+'" style="border-left-color:var(--c-'+cat.key+')" draggable="'+(draggable?"true":"false")+'" data-card-id="'+card.id+'">' +
+      '<div class="card-actions">'+actionsHtml+'</div>' +
+      orderControls +
+      '<div class="card-top">' +
+        '<div class="card-name">'+esc(card.name)+'</div>' +
+        (card.confirmed? '<span class="card-confirmed" title="已確認">✓</span>' : "") +
+      '</div>' +
+      (card.note? '<div class="card-note">'+esc(card.note)+'</div>' : "") +
+      (metaBits.length? '<div class="card-meta">'+metaBits.join("")+'</div>' : "") +
+      (membersHtml? '<div class="card-members">'+membersHtml+'</div>' : "") +
+      moveSelect +
+    '</div>'
+  );
+}
+
+/* ---------- render: sidebar ---------- */
+function renderSidebar(){
+  var el = document.getElementById("sidebar");
+  var pool = poolCards();
+  var byCat = {};
+  CAT_ORDER.forEach(function(k){ byCat[k]=[]; });
+  pool.forEach(function(c){ (byCat[c.category]=byCat[c.category]||[]).push(c); });
+  if(uiActiveCategory!=="all" && CAT_ORDER.indexOf(uiActiveCategory)<0) uiActiveCategory="all";
+
+  var memberChips = state.members.map(function(m,i){
+    var active = uiFilterMembers.indexOf(m.id)>=0;
+    return '<button class="member-chip'+(active?" active":"")+'" data-member="'+m.id+'" style="'+(active?"background:"+memberColor(m.id)+";border-color:"+memberColor(m.id)+";color:#fff;":"")+'">'+esc(m.name)+'</button>';
+  }).join("");
+
+  var railItems = '<button class="rail-item'+(uiActiveCategory==="all"?" active":"")+'" data-railcat="all">' +
+      '<span class="cat-dot" style="background:var(--text-faint)"></span><span>全部</span><span class="rail-count">'+pool.length+'</span></button>' +
+    CAT_ORDER.map(function(key){
+      var cat = CATS[key]; var items = byCat[key]||[];
+      return '<button class="rail-item'+(uiActiveCategory===key?" active":"")+'" data-railcat="'+key+'">' +
+        '<span class="cat-dot" style="background:var(--c-'+key+')"></span><span>'+esc(cat.short)+'</span><span class="rail-count">'+items.length+'</span></button>';
+    }).join("");
+
+  var panelItems = (uiActiveCategory==="all" ? pool : (byCat[uiActiveCategory]||[])).filter(matchesSearch);
+  var panelTitle = uiActiveCategory==="all" ? "全部候選卡片" : CATS[uiActiveCategory].label;
+  var panelBody = panelItems.length
+    ? panelItems.map(function(c){ return cardHtml(c, !isReadOnly); }).join("")
+    : '<div class="empty-note">這個分類目前沒有符合的卡片</div>';
+
+  el.innerHTML =
+    '<div class="sidebar-head"><h2>候選卡片庫</h2>' + (isReadOnly? "" : '<button class="btn btn-primary btn-sm" id="btn-add-card">+ 新增卡片</button>') + '</div>' +
+    '<input class="search-box" id="search-box" type="text" placeholder="搜尋卡片名稱或備註…" value="'+esc(uiSearch)+'">' +
+    '<div class="member-filter-head"><span class="member-filter-label">依成員篩選</span>' + (isReadOnly? "" : '<button class="btn btn-ghost btn-sm" id="btn-manage-members">✎ 管理成員</button>') + '</div>' +
+    '<div class="member-filter">'+memberChips+'</div>' +
+    '<div class="sidebar-body">' +
+      '<div class="cat-rail">'+railItems+'</div>' +
+      '<div class="cat-panel" id="cat-panel"><div class="panel-title">'+esc(panelTitle)+'</div>'+panelBody+'</div>' +
+    '</div>';
+
+  var searchComposing = false;
+  var searchBox = $("#search-box", el);
+  function applySearch(target){
+    uiSearch = target.value;
+    var selStart = target.selectionStart, selEnd = target.selectionEnd;
+    renderSidebar();
+    renderBoard();
+    var sb = document.getElementById("search-box");
+    if(sb){ sb.focus(); sb.setSelectionRange ? sb.setSelectionRange(selStart, selEnd) : null; }
+  }
+  searchBox.addEventListener("compositionstart", function(){ searchComposing = true; });
+  searchBox.addEventListener("compositionend", function(e){ searchComposing = false; applySearch(e.target); });
+  searchBox.addEventListener("input", function(e){
+    // While an IME (Chinese/Japanese/Korean) composition is in progress, don't
+    // rebuild the DOM — replacing the input mid-composition breaks the IME and
+    // only the raw phonetic keys (e.g. 注音) show up instead of the composed text.
+    if(searchComposing || e.isComposing) { uiSearch = e.target.value; return; }
+    applySearch(e.target);
+  });
+  el.querySelectorAll("[data-member]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var id = btn.getAttribute("data-member");
+      var idx = uiFilterMembers.indexOf(id);
+      if(idx>=0) uiFilterMembers.splice(idx,1); else uiFilterMembers.push(id);
+      renderSidebar(); renderBoard();
+    });
+  });
+  el.querySelectorAll("[data-railcat]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      uiActiveCategory = btn.getAttribute("data-railcat");
+      renderSidebar();
+    });
+  });
+  if(!isReadOnly){
+    var addBtn = document.getElementById("btn-add-card");
+    if(addBtn) addBtn.addEventListener("click", function(){ openCardModal(null); });
+    var manageBtn = document.getElementById("btn-manage-members");
+    if(manageBtn) manageBtn.addEventListener("click", openMemberModal);
+  }
+  bindCardActionButtons(el);
+  bindDraggableCards(el);
+  bindCardMoveSelects(el);
+  bindPoolDropzone(el);
+}
+
+/* ---------- render: board ---------- */
+function renderBoard(){
+  var grid = document.getElementById("board-grid");
+  var days = sortedDays();
+  var isNarrow = window.innerWidth <= 760;
+  var colWidth = isNarrow ? Math.round(window.innerWidth*0.86) : 268;
+  var addColWidth = isNarrow ? Math.round(window.innerWidth*0.4) : 120;
+  grid.style.gridAutoColumns = colWidth + "px";
+  grid.style.gridTemplateColumns = "repeat(" + days.length + ", " + colWidth + "px) " + addColWidth + "px";
+
+  var accomHtml = "";
+  state.accommodations.forEach(function(a){
+    var startIdx = days.findIndex(function(d){ return d.id===a.checkin; });
+    var endIdx = days.findIndex(function(d){ return d.id===a.checkout; });
+    if(startIdx<0) startIdx=0;
+    if(endIdx<0) endIdx=days.length-1;
+    accomHtml += '<div class="accom-bar" style="grid-column:'+(startIdx+1)+' / '+(endIdx+2)+'" title="'+esc(a.name)+' · '+esc(a.note||"")+'">🏨 '+esc(a.name)+'</div>';
+  });
+
+  var colsHtml = days.map(function(day, idx){
+    var present = presentMembersOnDay(day.id);
+    var avatars = present.map(function(id){
+      var m = memberById(id); if(!m) return "";
+      return '<span class="avatar" style="background:'+memberColor(id)+'" title="'+esc(m.name)+'">'+esc(memberInitial(m.name))+'</span>';
+    }).join("");
+    var cards = cardsForDay(day.id);
+    var cardsHtml = cards.length
+      ? cards.map(function(c){ return cardHtml(c, !isReadOnly); }).join("")
+      : '<div class="day-empty">從左側拖入行程卡</div>';
+    var dayActions = isReadOnly ? "" :
+      '<div class="day-head-actions">' +
+        '<button class="icon-btn" data-act="editday" data-day="'+day.id+'" title="修改這天的日期">✎</button>' +
+        '<button class="icon-btn" data-act="deleteday" data-day="'+day.id+'" title="刪除這天">✕</button>' +
+      '</div>';
+    return (
+      '<div class="day-col" style="grid-column:'+(idx+1)+'">' +
+        '<div class="day-head">' +
+          dayActions +
+          '<div class="day-date mono">'+fmtDate(day.id)+'</div>' +
+          '<div class="day-weekday">週'+weekdayOf(day.id)+'　·　在場 '+present.length+' 人</div>' +
+          '<div class="day-presence">'+avatars+'</div>' +
+        '</div>' +
+        '<div class="day-body" data-day-id="'+day.id+'">'+cardsHtml+'</div>' +
+      '</div>'
+    );
+  }).join("");
+
+  var addDayHtml = isReadOnly ? "" : '<div class="addday-col" style="grid-column:'+(days.length+1)+'"><button class="btn" id="btn-add-day">+ 新增天數</button></div>';
+
+  grid.innerHTML = accomHtml + colsHtml + addDayHtml;
+
+  if(!isReadOnly){
+    var addDayBtn = document.getElementById("btn-add-day");
+    if(addDayBtn) addDayBtn.addEventListener("click", function(){ openDayModal(null); });
+    grid.querySelectorAll('[data-act="editday"]').forEach(function(btn){
+      btn.addEventListener("click", function(){ openDayModal(btn.getAttribute("data-day")); });
+    });
+    grid.querySelectorAll('[data-act="deleteday"]').forEach(function(btn){
+      btn.addEventListener("click", function(){ deleteDay(btn.getAttribute("data-day")); });
+    });
+  }
+  bindCardActionButtons(grid);
+  bindDraggableCards(grid);
+  bindCardMoveSelects(grid);
+  bindDayDropzones(grid);
+}
+
+/* ---------- render: front-end app view (view-only, one day at a time) ---------- */
+function renderAppView(){
+  var el = document.getElementById("app-view");
+  var days = sortedDays();
+  if(!days.length){
+    el.innerHTML = '<div class="view-empty">目前還沒有安排任何日期</div>';
+    return;
+  }
+  if(!uiViewDay || !days.some(function(d){ return d.id===uiViewDay; })){
+    var t = todayIso();
+    uiViewDay = days.some(function(d){ return d.id===t; }) ? t : days[0].id;
+  }
+  var idx = days.findIndex(function(d){ return d.id===uiViewDay; });
+
+  var pillsHtml = days.map(function(d){
+    var active = d.id===uiViewDay ? " active" : "";
+    return '<button class="day-pill'+active+'" data-viewday="'+d.id+'"><span class="day-pill-date mono">'+fmtDate(d.id)+'</span><span class="day-pill-wd">週'+weekdayOf(d.id)+'</span></button>';
+  }).join("");
+
+  var present = presentMembersOnDay(uiViewDay);
+  var avatarsHtml = present.map(function(id){
+    var m = memberById(id); if(!m) return "";
+    return '<span class="avatar" style="background:'+memberColor(id)+'" title="'+esc(m.name)+'">'+esc(memberInitial(m.name))+'</span>';
+  }).join("");
+
+  var accom = accomForDay(uiViewDay);
+  var accomHtml = accom ? '<div class="view-accom">🏨　住宿：'+esc(accom.name)+(accom.note? '　·　'+esc(accom.note) : "")+'</div>' : "";
+
+  var fl = flightsForDay(uiViewDay);
+  var flightRows = [];
+  fl.arrivals.forEach(function(f){
+    var m = memberById(f.memberId);
+    flightRows.push('<div class="view-flight-row">🛬　'+esc(m?m.name:"")+' 抵達　·　'+esc(f.airline)+' '+esc(f.arrFlight)+'</div>');
+  });
+  fl.departures.forEach(function(f){
+    var m = memberById(f.memberId);
+    flightRows.push('<div class="view-flight-row">🛫　'+esc(m?m.name:"")+' 離開　·　'+esc(f.airline)+' '+esc(f.depFlight)+'</div>');
+  });
+  var flightsHtml = flightRows.length ? '<div class="view-flights">'+flightRows.join("")+'</div>' : "";
+
+  var cards = cardsForDay(uiViewDay);
+  var cardsHtml = cards.length
+    ? cards.map(function(c){ return cardHtml(c, false); }).join("")
+    : '<div class="view-empty">這天還沒有安排行程</div>';
+
+  el.innerHTML =
+    '<div class="view-daypills">'+pillsHtml+'</div>' +
+    '<div class="view-daynav">' +
+      '<button class="view-nav-btn" id="view-prev" '+(idx<=0?"disabled":"")+' aria-label="前一天">‹</button>' +
+      '<div class="view-daytitle"><div class="view-date mono">'+fmtDate(uiViewDay)+'</div><div class="view-weekday">週'+weekdayOf(uiViewDay)+'　·　在場 '+present.length+' 人</div></div>' +
+      '<button class="view-nav-btn" id="view-next" '+(idx>=days.length-1?"disabled":"")+' aria-label="下一天">›</button>' +
+    '</div>' +
+    (avatarsHtml ? '<div class="view-presence">'+avatarsHtml+'</div>' : "") +
+    accomHtml + flightsHtml +
+    '<div class="view-cards">'+cardsHtml+'</div>';
+
+  el.querySelectorAll("[data-viewday]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      uiViewDay = btn.getAttribute("data-viewday");
+      renderAppView();
+    });
+  });
+  var prevBtn = document.getElementById("view-prev");
+  var nextBtn = document.getElementById("view-next");
+  if(prevBtn) prevBtn.addEventListener("click", function(){
+    if(idx>0){ uiViewDay = days[idx-1].id; renderAppView(); }
+  });
+  if(nextBtn) nextBtn.addEventListener("click", function(){
+    if(idx<days.length-1){ uiViewDay = days[idx+1].id; renderAppView(); }
+  });
+
+  var activePill = el.querySelector(".day-pill.active");
+  if(activePill && activePill.scrollIntoView) activePill.scrollIntoView({inline:"center", block:"nearest"});
+}
+
+/* ---------- drag & drop ---------- */
+var draggingId = null;
+function bindDraggableCards(root){
+  root.querySelectorAll(".card[draggable=true]").forEach(function(el){
+    el.addEventListener("dragstart", function(e){
+      draggingId = el.getAttribute("data-card-id");
+      el.classList.add("dragging");
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", draggingId);
+    });
+    el.addEventListener("dragend", function(){
+      el.classList.remove("dragging");
+      draggingId = null;
+    });
+  });
+}
+function insertIndexFor(container, clientY){
+  var siblings = Array.prototype.slice.call(container.querySelectorAll(".card:not(.dragging)"));
+  for(var i=0;i<siblings.length;i++){
+    var box = siblings[i].getBoundingClientRect();
+    if(clientY < box.top + box.height/2) return i;
+  }
+  return siblings.length;
+}
+function placePlaceholder(zone, idx){
+  var ph = zone.querySelector(".drop-placeholder");
+  if(!ph){ ph = document.createElement("div"); ph.className = "drop-placeholder"; }
+  var cards = Array.prototype.slice.call(zone.querySelectorAll(".card:not(.dragging)"));
+  var ref = cards[idx] || null;
+  if(ref) zone.insertBefore(ph, ref); else zone.appendChild(ph);
+}
+function removePlaceholder(zone){
+  var ph = zone.querySelector(".drop-placeholder");
+  if(ph) ph.remove();
+}
+function bindDayDropzones(root){
+  root.querySelectorAll(".day-body").forEach(function(zone){
+    zone.addEventListener("dragover", function(e){
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      zone.classList.add("drag-over");
+      placePlaceholder(zone, insertIndexFor(zone, e.clientY));
+    });
+    zone.addEventListener("dragleave", function(e){
+      if(!zone.contains(e.relatedTarget)){
+        zone.classList.remove("drag-over");
+        removePlaceholder(zone);
+      }
+    });
+    zone.addEventListener("drop", function(e){
+      e.preventDefault();
+      zone.classList.remove("drag-over");
+      removePlaceholder(zone);
+      var id = e.dataTransfer.getData("text/plain") || draggingId;
+      if(!id) return;
+      var dayId = zone.getAttribute("data-day-id");
+      var idx = insertIndexFor(zone, e.clientY);
+      moveCard(id, dayId, idx);
+    });
+  });
+}
+function bindPoolDropzone(root){
+  var zone = root.querySelector("#cat-panel");
+  if(!zone) return;
+  zone.addEventListener("dragover", function(e){ e.preventDefault(); e.dataTransfer.dropEffect="move"; zone.classList.add("drag-over"); });
+  zone.addEventListener("dragleave", function(){ zone.classList.remove("drag-over"); });
+  zone.addEventListener("drop", function(e){
+    e.preventDefault();
+    zone.classList.remove("drag-over");
+    var id = e.dataTransfer.getData("text/plain") || draggingId;
+    if(!id) return;
+    var card = state.cards.find(function(c){ return c.id===id; });
+    if(card && uiActiveCategory!=="all") uiActiveCategory = card.category;
+    moveCard(id, null, 0);
+  });
+}
+function bindCardMoveSelects(root){
+  root.querySelectorAll(".card-move-select").forEach(function(sel){
+    sel.addEventListener("mousedown", function(e){ e.stopPropagation(); });
+    sel.addEventListener("click", function(e){ e.stopPropagation(); });
+    sel.addEventListener("change", function(e){
+      e.stopPropagation();
+      var id = sel.getAttribute("data-move-id");
+      var dayId = sel.value || null;
+      var insertIdx = dayId ? cardsForDay(dayId).length : poolCards().filter(function(c){ return c.id!==id; }).length;
+      moveCard(id, dayId, insertIdx);
+    });
+  });
+}
+function moveCard(cardId, dayId, insertIdx){
+  var card = state.cards.find(function(c){ return c.id===cardId; });
+  if(!card) return;
+  card.dayId = dayId;
+  var siblings = (dayId ? cardsForDay(dayId) : poolCards()).filter(function(c){ return c.id!==cardId; });
+  siblings.splice(insertIdx, 0, card);
+  siblings.forEach(function(c,i){ c.order = i; });
+  renderSidebar(); renderBoard();
+  scheduleSave();
+}
+
+/* ---------- card actions (edit/unschedule/delete/reorder) ---------- */
+function unscheduleCard(cardId){
+  var card = state.cards.find(function(c){ return c.id===cardId; });
+  if(!card) return;
+  if(uiActiveCategory!=="all") uiActiveCategory = card.category;
+  moveCard(cardId, null, poolCards().length);
+  showToast('已把「'+card.name+'」移回卡片庫（資料還在，沒有刪除）');
+}
+function reorderCard(cardId, direction){
+  var card = state.cards.find(function(c){ return c.id===cardId; });
+  if(!card || !card.dayId) return;
+  var siblings = cardsForDay(card.dayId);
+  var idx = siblings.findIndex(function(c){ return c.id===cardId; });
+  var newIdx = idx + direction;
+  if(idx<0 || newIdx<0 || newIdx>=siblings.length) return;
+  var a = siblings[idx], b = siblings[newIdx];
+  var tmp = a.order; a.order = b.order; b.order = tmp;
+  renderSidebar(); renderBoard();
+  scheduleSave();
+}
+function deleteDay(dayId){
+  if(!dayId) return;
+  var day = state.days.find(function(d){ return d.id===dayId; });
+  if(!day) return;
+  var cardsOnDay = cardsForDay(dayId);
+  var msg = "確定要刪除 "+fmtDate(dayId)+" 這一天嗎？";
+  if(cardsOnDay.length){
+    msg += "\n\n這天有 "+cardsOnDay.length+" 張卡片（含已確認事項），刪除後會自動移回卡片庫，資料不會不見。";
+  }
+  if(!confirm(msg)) return;
+  var poolLen = poolCards().length;
+  cardsOnDay.forEach(function(c, i){
+    c.dayId = null;
+    c.order = poolLen + i;
+  });
+  state.days = state.days.filter(function(d){ return d.id!==dayId; });
+  renderAll();
+  scheduleSave();
+  showToast('已刪除 '+fmtDate(dayId)+'，原本排在這天的卡片已移回卡片庫');
+}
+
+function bindCardActionButtons(root){
+  root.querySelectorAll('[data-act="edit"]').forEach(function(btn){
+    btn.addEventListener("click", function(e){
+      e.stopPropagation();
+      openCardModal(btn.getAttribute("data-id"));
+    });
+  });
+  root.querySelectorAll('[data-act="unschedule"]').forEach(function(btn){
+    btn.addEventListener("click", function(e){
+      e.stopPropagation();
+      unscheduleCard(btn.getAttribute("data-id"));
+    });
+  });
+  root.querySelectorAll('[data-act="moveup"]').forEach(function(btn){
+    btn.addEventListener("click", function(e){
+      e.stopPropagation();
+      reorderCard(btn.getAttribute("data-id"), -1);
+    });
+  });
+  root.querySelectorAll('[data-act="movedown"]').forEach(function(btn){
+    btn.addEventListener("click", function(e){
+      e.stopPropagation();
+      reorderCard(btn.getAttribute("data-id"), 1);
+    });
+  });
+  root.querySelectorAll('[data-act="delete"]').forEach(function(btn){
+    btn.addEventListener("click", function(e){
+      e.stopPropagation();
+      var id = btn.getAttribute("data-id");
+      var card = state.cards.find(function(c){ return c.id===id; });
+      if(card && card.confirmed){
+        if(!confirm('「'+card.name+'」是已確認事項，確定要刪除嗎？')) return;
+      } else if(!confirm("確定要刪除這張卡片嗎？")){
+        return;
+      }
+      state.cards = state.cards.filter(function(c){ return c.id!==id; });
+      renderAll();
+      scheduleSave();
+    });
+  });
+}
+
+/* ---------- modals ---------- */
+function closeModal(){ document.getElementById("modal-root").innerHTML = ""; }
+
+function openCardModal(cardId){
+  editingCardId = cardId;
+  var card = cardId ? state.cards.find(function(c){ return c.id===cardId; }) : null;
+  var catRadios = CAT_ORDER.map(function(k){
+    var cat = CATS[k];
+    var checked = card ? card.category===k : k==="sight";
+    return '<input type="radio" class="cat-radio" name="cat" id="cat-'+k+'" value="'+k+'" '+(checked?"checked":"")+'>' +
+      '<label class="cat-radio-label" for="cat-'+k+'"><span class="cat-dot" style="background:var(--c-'+k+')"></span>'+esc(cat.label)+'</label>';
+  }).join("");
+  var memberChecks = state.members.map(function(m){
+    var checked = card && card.memberIds.indexOf(m.id)>=0;
+    return '<input type="checkbox" class="member-check" id="mem-'+m.id+'" value="'+m.id+'" '+(checked?"checked":"")+'>' +
+      '<label class="member-check-label" for="mem-'+m.id+'">'+esc(m.name)+'</label>';
+  }).join("");
+  var dayOptions = '<option value="">尚未排入行程</option>' + sortedDays().map(function(d){
+    var sel = card && card.dayId===d.id ? "selected" : "";
+    return '<option value="'+d.id+'" '+sel+'>'+fmtDate(d.id)+' 週'+weekdayOf(d.id)+'</option>';
+  }).join("");
+
+  var html =
+    '<div class="modal-backdrop" id="modal-backdrop">' +
+      '<div class="modal">' +
+        '<h2>'+(card?"編輯卡片":"新增卡片")+'</h2>' +
+        '<div class="field"><label>分類</label><div class="cat-radio-row">'+catRadios+'</div></div>' +
+        '<div class="field"><label>名稱 *</label><input type="text" id="f-name" value="'+esc(card?card.name:"")+'" placeholder="例如：Octave Rooftop Bar"></div>' +
+        '<div class="field"><label>備註</label><textarea id="f-note" placeholder="特色、注意事項…">'+esc(card?card.note:"")+'</textarea></div>' +
+        '<div class="field"><label>價格</label><input type="text" id="f-price" value="'+esc(card?card.price:"")+'" placeholder="例如：約1000/人"></div>' +
+        '<div class="field"><label>建議時段</label><input type="text" id="f-time" value="'+esc(card?card.time:"")+'" placeholder="例如：17:00 或 晚餐時段"></div>' +
+        '<div class="field"><label>地址／店名（用來產生 Google Map 連結）</label><input type="text" id="f-address" value="'+esc(card?card.address:"")+'" placeholder="店名或地址"></div>' +
+        '<div class="field"><label class="checkbox-row"><input type="checkbox" id="f-automap" checked><span>自動用名稱＋地址產生 Google Map 搜尋連結</span></label>' +
+          '<input type="text" id="f-mapurl" style="margin-top:6px;display:none;" value="'+esc(card?card.mapUrl:"")+'" placeholder="貼上精準的 Google Map 連結"></div>' +
+        '<div class="field"><label>排入日期</label><select id="f-day">'+dayOptions+'</select></div>' +
+        '<div class="field"><label>相關成員（選填）</label><div class="member-check-row">'+memberChecks+'</div></div>' +
+        '<div class="modal-actions">' +
+          (card && !card.confirmed ? '<button class="btn btn-sm" id="btn-delete-card">刪除</button>' : "") +
+          '<button class="btn" id="btn-cancel-card">取消</button>' +
+          '<button class="btn btn-primary" id="btn-save-card">儲存</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  document.getElementById("modal-root").innerHTML = html;
+
+  var autoMap = document.getElementById("f-automap");
+  var mapUrlField = document.getElementById("f-mapurl");
+  autoMap.addEventListener("change", function(){ mapUrlField.style.display = autoMap.checked ? "none" : "block"; });
+  if(card && card.mapUrl){ autoMap.checked=false; mapUrlField.style.display="block"; }
+
+  document.getElementById("modal-backdrop").addEventListener("click", function(e){ if(e.target.id==="modal-backdrop") closeModal(); });
+  document.getElementById("btn-cancel-card").addEventListener("click", closeModal);
+  var delBtn = document.getElementById("btn-delete-card");
+  if(delBtn) delBtn.addEventListener("click", function(){
+    if(!confirm("確定要刪除這張卡片嗎？")) return;
+    state.cards = state.cards.filter(function(c){ return c.id!==cardId; });
+    closeModal(); renderAll(); scheduleSave();
+  });
+  document.getElementById("btn-save-card").addEventListener("click", function(){
+    var name = document.getElementById("f-name").value.trim();
+    if(!name){ alert("請輸入名稱"); return; }
+    var cat = (document.querySelector('input[name="cat"]:checked')||{}).value || "sight";
+    var note = document.getElementById("f-note").value.trim();
+    var price = document.getElementById("f-price").value.trim();
+    var time = document.getElementById("f-time").value.trim();
+    var address = document.getElementById("f-address").value.trim();
+    var manualMap = autoMap.checked ? "" : mapUrlField.value.trim();
+    var dayId = document.getElementById("f-day").value || null;
+    var memberIds = Array.prototype.slice.call(document.querySelectorAll(".member-check:checked")).map(function(el){ return el.value; });
+
+    // Re-fetch the live card by id rather than trusting the reference captured when
+    // the modal opened — someone else's edit may have replaced the whole state object
+    // (real-time sync) while this modal was sitting open.
+    var liveCard = cardId ? state.cards.find(function(c){ return c.id===cardId; }) : null;
+    if(liveCard){
+      liveCard.category=cat; liveCard.name=name; liveCard.note=note; liveCard.price=price; liveCard.time=time;
+      liveCard.address=address; liveCard.mapUrl=manualMap; liveCard.memberIds=memberIds;
+      if(liveCard.dayId!==dayId){
+        liveCard.dayId = dayId;
+        var sibs = (dayId? cardsForDay(dayId): poolCards()).filter(function(c){return c.id!==liveCard.id;});
+        sibs.push(liveCard);
+        sibs.forEach(function(c,i){ c.order=i; });
+      }
+    } else {
+      var newCard = {
+        id: cardId || uid("card-"), category:cat, name:name, note:note, price:price, time:time,
+        address:address, mapUrl:manualMap, dayId:dayId, memberIds:memberIds, confirmed:false, order:0
+      };
+      var sibs2 = dayId? cardsForDay(dayId): poolCards();
+      newCard.order = sibs2.length;
+      state.cards.push(newCard);
+    }
+    closeModal(); renderAll(); scheduleSave();
+  });
+}
+
+function openDayModal(editDayId){
+  var editing = !!editDayId;
+  var day = editing ? state.days.find(function(d){ return d.id===editDayId; }) : null;
+  if(editing && !day) return;
+  var cardsOnDay = editing ? cardsForDay(editDayId) : [];
+  var hint = editing && cardsOnDay.length ?
+    '<p class="field-hint">這天目前有 '+cardsOnDay.length+' 張卡片，修改日期後會一起搬到新日期。</p>' : "";
+  var html =
+    '<div class="modal-backdrop" id="modal-backdrop">' +
+      '<div class="modal" style="max-width:340px;">' +
+        '<h2>'+(editing?"修改日期":"新增天數")+'</h2>' +
+        '<div class="field"><label>日期</label><input type="date" id="f-newday" value="'+(editing?esc(day.id):"")+'"></div>' +
+        hint +
+        '<div class="modal-actions">' +
+          (editing ? '<button class="btn btn-sm" id="btn-delete-day">刪除這天</button>' : "") +
+          '<button class="btn" id="btn-cancel-day">取消</button>' +
+          '<button class="btn btn-primary" id="btn-save-day">'+(editing?"儲存":"新增")+'</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  document.getElementById("modal-root").innerHTML = html;
+  document.getElementById("modal-backdrop").addEventListener("click", function(e){ if(e.target.id==="modal-backdrop") closeModal(); });
+  document.getElementById("btn-cancel-day").addEventListener("click", closeModal);
+  var delBtn = document.getElementById("btn-delete-day");
+  if(delBtn) delBtn.addEventListener("click", function(){
+    closeModal();
+    deleteDay(editDayId);
+  });
+  document.getElementById("btn-save-day").addEventListener("click", function(){
+    var v = document.getElementById("f-newday").value;
+    if(!v){ alert("請選擇日期"); return; }
+    var clash = state.days.some(function(d){ return d.id===v && d.id!==editDayId; });
+    if(clash){ alert("這天已經存在了"); return; }
+    if(editing){
+      // Re-fetch live, same reasoning as the card modal: this modal may have
+      // been open while a real-time update from someone else replaced state.
+      var liveDay = state.days.find(function(d){ return d.id===editDayId; });
+      if(!liveDay){ closeModal(); showToast("這天已經被移除了"); renderAll(); return; }
+      if(v!==liveDay.id){
+        cardsForDay(editDayId).forEach(function(c){ c.dayId = v; });
+        liveDay.id = v;
+      }
+    } else {
+      state.days.push({id:v});
+    }
+    closeModal(); renderAll(); scheduleSave();
+    showToast(editing ? "日期已更新" : "已新增一天");
+  });
+}
+
+function openMemberModal(){
+  var rows = state.members.map(function(m){
+    return '<div class="member-row" data-mid="'+m.id+'">' +
+        '<span class="avatar" style="background:'+memberColor(m.id)+'">'+esc(memberInitial(m.name))+'</span>' +
+        '<input type="text" class="member-name-input" value="'+esc(m.name)+'">' +
+        '<button type="button" class="icon-btn" data-mdel="1" title="移除">✕</button>' +
+      '</div>';
+  }).join("");
+  var html =
+    '<div class="modal-backdrop" id="modal-backdrop">' +
+      '<div class="modal">' +
+        '<h2>管理成員</h2>' +
+        '<div class="field"><label>目前成員（可直接改名，改名後所有卡片與航班紀錄會自動跟著更新）</label>' +
+          '<div id="member-rows" style="display:flex;flex-direction:column;gap:8px;">'+rows+'</div>' +
+        '</div>' +
+        '<div class="field"><label>新增成員</label><div style="display:flex;gap:8px;">' +
+          '<input type="text" id="f-new-member" placeholder="輸入姓名" style="flex:1;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:.85rem;">' +
+          '<button type="button" class="btn btn-sm" id="btn-add-member">加入</button>' +
+        '</div>' +
+        '<div class="empty-note">新成員預設沒有航班資料，不會自動出現在每日在場人數，可以之後在編輯卡片時指定給他。</div>' +
+        '</div>' +
+        '<div class="modal-actions">' +
+          '<button class="btn" id="btn-cancel-members">取消</button>' +
+          '<button class="btn btn-primary" id="btn-save-members">儲存</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  document.getElementById("modal-root").innerHTML = html;
+
+  function bindRemoveButtons(){
+    document.querySelectorAll('#member-rows [data-mdel]').forEach(function(btn){
+      btn.onclick = function(){ btn.closest(".member-row").remove(); };
+    });
+  }
+  bindRemoveButtons();
+
+  document.getElementById("modal-backdrop").addEventListener("click", function(e){ if(e.target.id==="modal-backdrop") closeModal(); });
+  document.getElementById("btn-cancel-members").addEventListener("click", closeModal);
+  document.getElementById("btn-add-member").addEventListener("click", function(){
+    var input = document.getElementById("f-new-member");
+    var v = input.value.trim();
+    if(!v) return;
+    var row = document.createElement("div");
+    row.className = "member-row";
+    row.setAttribute("data-mid", "__new__");
+    row.innerHTML = '<span class="avatar" style="background:hsl(0 0% 52%)">'+esc(v.slice(0,1))+'</span>' +
+      '<input type="text" class="member-name-input" value="'+esc(v)+'">' +
+      '<button type="button" class="icon-btn" data-mdel="1" title="移除">✕</button>';
+    document.getElementById("member-rows").appendChild(row);
+    input.value = "";
+    input.focus();
+    bindRemoveButtons();
+  });
+  document.getElementById("btn-save-members").addEventListener("click", function(){
+    var rowEls = document.querySelectorAll("#member-rows .member-row");
+    var newMembers = [];
+    rowEls.forEach(function(rowEl){
+      var mid = rowEl.getAttribute("data-mid");
+      var nameVal = rowEl.querySelector(".member-name-input").value.trim();
+      if(!nameVal) return;
+      if(mid==="__new__"){
+        newMembers.push({id: uid("m"), name: nameVal});
+      } else {
+        newMembers.push({id: mid, name: nameVal});
+      }
+    });
+    var keptIds = newMembers.map(function(m){ return m.id; });
+    var removedIds = state.members.map(function(m){ return m.id; }).filter(function(id){ return keptIds.indexOf(id)<0; });
+    state.members = newMembers;
+    if(removedIds.length){
+      state.flights = state.flights.filter(function(f){ return removedIds.indexOf(f.memberId)<0; });
+      state.cards.forEach(function(c){ c.memberIds = c.memberIds.filter(function(id){ return removedIds.indexOf(id)<0; }); });
+      uiFilterMembers = uiFilterMembers.filter(function(id){ return removedIds.indexOf(id)<0; });
+    }
+    closeModal(); renderAll(); scheduleSave();
+  });
+}
+
+/* ---------- toast ---------- */
+function showToast(msg){
+  var root = document.getElementById("toast-root");
+  var t = document.createElement("div");
+  t.className = "toast";
+  t.textContent = msg;
+  root.innerHTML = "";
+  root.appendChild(t);
+  setTimeout(function(){ if(root.contains(t)) root.removeChild(t); }, 3200);
+}
+
+/* ---------- persistence (Firebase Firestore, shared by every viewer) ---------- */
+var applyingRemote = false;
+
+function applyRemoteState(data){
+  var incoming = JSON.stringify(data);
+  if(incoming === JSON.stringify(state)) return; // same data delivered again (e.g. our own write's pending->confirmed echo) — nothing to do
+  applyingRemote = true;
+  state = data;
+  // Don't yank the board out from under someone mid-edit — the fresh data is
+  // already in `state` so save-time lookups see it, but the visual refresh
+  // waits until they close the modal (every modal path already calls renderAll()).
+  if(!document.getElementById("modal-backdrop")){
+    renderAll();
+  }
+  applyingRemote = false;
+}
+
+function scheduleSave(){
+  if(applyingRemote) return; // this change came FROM the database, don't write it back
+  dirty = true;
+  setStatus("saving","同步中…");
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(doSave, 900);
+}
+
+function doSave(){
+  if(!tripRef){ setStatus("error","尚未連線，稍後會自動重試"); return; }
+  var payload = JSON.parse(JSON.stringify(state));
+  setDoc(tripRef, payload).then(function(){
+    dirty = false;
+    setStatus("saved","已同步");
+  }).catch(function(err){
+    console.error("save failed", err);
+    setStatus("error","同步失敗，稍後會自動重試");
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(doSave, 3000 + Math.random()*2000);
+  });
+}
+
+/* ---------- init ---------- */
+function renderAll(){
+  renderHeader();
+  var appEl = document.getElementById("app");
+  if(isReadOnly){
+    appEl.classList.add("view-mode");
+    renderAppView();
+  } else {
+    appEl.classList.remove("view-mode");
+    renderSidebar();
+    renderBoard();
+  }
+}
+
+window.addEventListener("resize", function(){
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(function(){ if(!isReadOnly) renderBoard(); }, 200);
+});
+
+window.addEventListener("beforeunload", function(e){
+  if(dirty){ e.preventDefault(); e.returnValue = ""; }
+});
+
+document.addEventListener("DOMContentLoaded", function(){
+  renderAll(); // instant paint from the seed data while we connect to the database
+  setStatus("saving","連線中…");
+  onSnapshot(tripRef, function(snap){
+    if(snap.exists()){
+      applyRemoteState(snap.data());
+      setStatus("saved","已同步");
+    } else {
+      // Nobody has saved anything yet — seed the database with our starter data.
+      setDoc(tripRef, state).catch(function(err){
+        console.error("seed failed", err);
+        setStatus("error","初始化資料庫失敗");
+      });
+    }
+  }, function(err){
+    console.error("onSnapshot error", err);
+    setStatus("error","連線中斷，稍後會自動重試");
+  });
+});
+
+</script>
+</body>
+</html>
