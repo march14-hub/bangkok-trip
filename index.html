@@ -17,6 +17,7 @@
   --river:#14544B;
   --c-sight:#2C7A8C; --c-food:#C0721F; --c-bar:#6B5CA5; --c-mall:#8C6D1F;
   --c-market:#A63A2E; --c-spa:#3F7A57; --c-stay:#45608C; --c-flight:#6B6F63;
+  --c-wish:#B0468C;
   --radius:10px; --radius-sm:6px;
 }
 @media (prefers-color-scheme: dark){
@@ -28,6 +29,7 @@
     --river:#1F6E63;
     --c-sight:#4FB7CC; --c-food:#F0A85C; --c-bar:#9A8AD1; --c-mall:#C9A94A;
     --c-market:#E17A63; --c-spa:#8FC2A0; --c-stay:#7FA0D6; --c-flight:#A6ACA0;
+    --c-wish:#E28AC8;
   }
 }
 :root[data-theme="dark"]{
@@ -38,6 +40,7 @@
   --river:#1F6E63;
   --c-sight:#4FB7CC; --c-food:#F0A85C; --c-bar:#9A8AD1; --c-mall:#C9A94A;
   --c-market:#E17A63; --c-spa:#8FC2A0; --c-stay:#7FA0D6; --c-flight:#A6ACA0;
+  --c-wish:#E28AC8;
 }
 *{box-sizing:border-box;}
 body{margin:0;background:var(--bg);color:var(--text);font-family:"Plus Jakarta Sans",system-ui,-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;}
@@ -127,6 +130,21 @@ input,select,textarea{font-family:inherit;}
 /* member manage modal */
 .member-row{display:flex;align-items:center;gap:8px;}
 .member-name-input{flex:1;padding:6px 8px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:.82rem;}
+
+/* category manage modal */
+.cat-row{display:flex;align-items:center;gap:8px;}
+.cat-row .cat-dot{width:12px;height:12px;border-radius:4px;flex:0 0 auto;}
+.cat-locked-label{flex:1;font-size:.82rem;color:var(--text-muted);}
+.rail-item.add-cat{color:var(--text-faint);border:1px dashed var(--border);}
+.rail-item.add-cat:hover{color:var(--text);border-color:var(--accent);}
+
+/* flight manage modal */
+.flight-row{display:flex;flex-direction:column;gap:6px;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);}
+.flight-row-head{display:flex;align-items:center;gap:8px;font-size:.82rem;font-weight:700;}
+.flight-row-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.flight-row-grid input{width:100%;padding:6px 7px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:.76rem;}
+.flight-row-grid label{display:block;font-size:.66rem;color:var(--text-faint);margin-bottom:2px;}
+#flight-rows{display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow-y:auto;padding-right:2px;}
 
 /* card */
 .card{background:var(--surface);border:1px solid var(--border);border-left-width:4px;border-radius:var(--radius-sm);padding:8px 10px;box-shadow:var(--shadow);cursor:grab;position:relative;}
@@ -222,23 +240,23 @@ input,select,textarea{font-family:inherit;}
 {
   "trip": {"title":"曼谷跨年共編行程板","start":"2026-12-25","end":"2027-01-03"},
   "members": [
-    {"id":"m1","name":"Connie"},{"id":"m2","name":"UU"},{"id":"m3","name":"Arrow"},
-    {"id":"m4","name":"Kallen"},{"id":"m5","name":"Fiona"},{"id":"m6","name":"湘梅(Mel)"},
+    {"id":"m1","name":"Connie"},{"id":"m3","name":"Arrow"},
+    {"id":"m4","name":"Kallen"},{"id":"m5","name":"Fiona"},{"id":"m6","name":"Mel"},
     {"id":"m7","name":"Coco"},{"id":"m8","name":"小P"},{"id":"m9","name":"Eden"},
     {"id":"m10","name":"Erica"},{"id":"m11","name":"海哥"},{"id":"m12","name":"曙"},
     {"id":"m13","name":"順平"},{"id":"m14","name":"Jean"}
   ],
+  "categories": [],
   "flights": [
     {"memberId":"m1","airline":"長榮航空","arrDate":"2026-12-25","arrFlight":"BR075 08:25→11:30","depDate":"2027-01-02","depFlight":"BR076 12:45→17:15"},
-    {"memberId":"m2","airline":"星宇航空","arrDate":"2026-12-25","arrFlight":"JX820 09:25→12:35","depDate":"2027-01-02","depFlight":"JX821 13:45→18:25"},
-    {"memberId":"m3","airline":"星宇航空","arrDate":"2026-12-25","arrFlight":"JX820 09:25→12:35","depDate":"2027-01-02","depFlight":"JX821 13:45→18:25"},
+    {"memberId":"m3","airline":"星宇航空","arrDate":"2026-12-25","arrFlight":"JX741 09:25→12:35","depDate":"2027-01-02","depFlight":"JX742 14:50→19:30"},
     {"memberId":"m4","airline":"泰國航空","arrDate":"2026-12-25","arrFlight":"TG633 13:55→16:50","depDate":"2027-01-02","depFlight":"TG636 17:30→22:10"},
     {"memberId":"m5","airline":"泰國航空","arrDate":"2026-12-25","arrFlight":"TG633 13:55→16:50","depDate":"2027-01-02","depFlight":"TG636 17:30→22:10"},
     {"memberId":"m6","airline":"泰國航空","arrDate":"2026-12-25","arrFlight":"TG633 13:55→16:50","depDate":"2027-01-02","depFlight":"TG636 17:30→22:10"},
     {"memberId":"m7","airline":"長榮航空","arrDate":"2026-12-28","arrFlight":"BR075 09:40→12:35","depDate":"2027-01-02","depFlight":"BR076 17:15→21:50"},
     {"memberId":"m8","airline":"長榮航空","arrDate":"2026-12-28","arrFlight":"BR075 09:40→12:35","depDate":"2027-01-02","depFlight":"BR076 17:15→21:50"},
-    {"memberId":"m9","airline":"星宇航空","arrDate":"2026-12-29","arrFlight":"JX820 09:25→12:35","depDate":"2027-01-02","depFlight":"JX821 13:45→18:25"},
-    {"memberId":"m10","airline":"星宇航空","arrDate":"2026-12-29","arrFlight":"JX820 09:25→12:35","depDate":"2027-01-02","depFlight":"JX821 13:45→18:25"},
+    {"memberId":"m9","airline":"星宇航空","arrDate":"2026-12-29","arrFlight":"JX741 09:25→12:35","depDate":"2027-01-02","depFlight":"JX742 14:50→19:30"},
+    {"memberId":"m10","airline":"星宇航空","arrDate":"2026-12-29","arrFlight":"JX741 09:25→12:35","depDate":"2027-01-02","depFlight":"JX742 14:50→19:30"},
     {"memberId":"m11","airline":"泰國航空","arrDate":"2026-12-30","arrFlight":"TG637 07:55→10:50","depDate":"2027-01-03","depFlight":"TG634 12:40→17:20"},
     {"memberId":"m12","airline":"泰國航空","arrDate":"2026-12-30","arrFlight":"TG637 07:55→10:50","depDate":"2027-01-03","depFlight":"TG634 12:40→17:20"},
     {"memberId":"m13","airline":"長榮航空","arrDate":"2026-12-30","arrFlight":"BR075 09:40→12:35","depDate":"2027-01-03","depFlight":"BR076 17:15→21:50"},
@@ -314,7 +332,23 @@ input,select,textarea{font-family:inherit;}
     {"id":"spa-6","category":"spa","name":"Nikko Thai Massage","note":"近 Bangrak House，步行約4分鐘","price":"","address":"Nikko Thai Massage, Bangkok","time":"","mapUrl":"","dayId":null,"memberIds":[]},
     {"id":"spa-7","category":"spa","name":"Baan Bangrak Massage","note":"近 Bangrak House，步行約3分鐘","price":"","address":"Baan Bangrak Massage, Bangkok","time":"","mapUrl":"","dayId":null,"memberIds":[]},
     {"id":"spa-8","category":"spa","name":"Style Thai Massage","note":"近 Bangrak House，步行約5分鐘","price":"","address":"Style Thai Massage, Bangkok","time":"","mapUrl":"","dayId":null,"memberIds":[]},
-    {"id":"spa-9","category":"spa","name":"CHOKTAWEE THAI MASSAGE","note":"近 Bangrak House，步行約2分鐘","price":"","address":"Choktawee Thai Massage, Bangkok","time":"","mapUrl":"","dayId":null,"memberIds":[]}
+    {"id":"spa-9","category":"spa","name":"CHOKTAWEE THAI MASSAGE","note":"近 Bangrak House，步行約2分鐘","price":"","address":"Choktawee Thai Massage, Bangkok","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+
+    {"id":"wish-1","category":"wish","name":"卡通廟看米奇","note":"許願池：待實地確認廟名與交通方式","price":"","address":"","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"wish-2","category":"wish","name":"抽大麻水菸體驗","note":"候選店家：Michi Cannabis Bar（近BTS Chong Nonsi，室內吸菸包廂＋Thai Craft啤酒＋中文服務）／High Thai Weed（Asoke/Sukhumvit 33，沙發＋電視＋PS5＋Rooftop酒吧）／Stash BKK Ari（24小時營業，酒吧＋按摩椅）。出發前請留意2026泰國大麻法規更新（旅客僅能醫療用途攜帶）","price":"","address":"","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"wish-3","category":"wish","name":"Merge 品牌購物","note":"許願池：待補充地址與營業時間","price":"","address":"","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"wish-4","category":"wish","name":"Sleeping Cloud 品牌購物","note":"許願池：待補充地址與營業時間","price":"","address":"","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"wish-5","category":"wish","name":"客製化泰拳褲","note":"許願池：待補充店家資訊","price":"","address":"","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"wish-6","category":"wish","name":"敷面膜體驗＋聊天","note":"許願池：待補充店家資訊","price":"","address":"","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"wish-7","category":"wish","name":"泰拳體驗（情侶對打擂台）","note":"許願池：待補充店家與價格","price":"","address":"","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"wish-8","category":"wish","name":"泰式校服體驗（同學會出遊風）","note":"含校服租借店面介紹，待補充地址與價格","price":"","address":"","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"wish-9","category":"wish","name":"嗨咖主題餐廳體驗","note":"許願池：待補充店家資訊","price":"","address":"","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+    {"id":"wish-10","category":"wish","name":"Rose家妝髮／擺拍一條龍","note":"泰服＋妝髮＋攝影一條龍。營業 08:00–18:00｜WeChat：Ava273315｜Line：+66958812667｜IG：@rosephotobbk（ThaiCostume, Bangkok Makeup, Photoshoot）","price":"","address":"","time":"08:00–18:00","mapUrl":"https://www.instagram.com/rosephotobbk/","dayId":null,"memberIds":[]},
+    {"id":"wish-11","category":"wish","name":"SANGARUN.THAI COSTUME 泰服體驗","note":"服飾+配件全天300THB（含簡易髮型）／基礎妝髮+泰服+配件700THB／高級泰妝+美髮+泰服+全配件1600THB（完整流程約2–2.5hr）。攝影師另計：1–2人2000THB、3–4人2500THB、5–6人3000THB、7–8人3500THB、9–10人4000THB（拍攝約1–1.5hr，全數交付）。IG：@sangarun.thaicostume","price":"THB300–1600（+攝影另計）","address":"","time":"","mapUrl":"","dayId":null,"memberIds":[]},
+
+    {"id":"card-k9gb4jw","category":"sight","name":"四面佛","note":"搭乘 BTS 空鐵至 Chit Lom（奇隆站）2號出口步行約5分鐘","price":"免費","address":"","time":"每日約 06:00 至 22:00","mapUrl":"","dayId":null,"memberIds":[],"confirmed":false,"order":52},
+    {"id":"card-sxtzxzz","category":"flight","name":"換錢 | 綠標總店（SuperRich Thailand）","note":"Headquarter Rajdamri 1","price":"0","address":"45 ซอย ราชดำริ1 Lumphini, Pathum Wan, Bangkok 10330泰國","time":"週一至週五 09:00–18:00；週六 09:30–17:00；週日休息","mapUrl":"","dayId":"2026-12-25","memberIds":["m1","m3","m4","m5","m6"],"confirmed":false,"order":1},
+    {"id":"card-hvoxqal","category":"sight","name":"Check In | Riverside Carnival Cruise","note":"晚餐船check in時間\nCruise time 09.00 PM – 01.00 PM,\nBoarding Location at Riverside Bangkok Hotel Pier,","price":"4800/人","address":"Riverside Bangkok Hotel","time":"18:30 for check-in.","mapUrl":"","dayId":"2026-12-31","memberIds":["m1","m3","m4","m5","m6","m7","m8","m9","m10","m11","m12","m13","m14"],"confirmed":false,"order":0}
   ]
 }
 </script>
@@ -336,20 +370,53 @@ var fbApp = initializeApp(firebaseConfig);
 var db = getFirestore(fbApp);
 var tripRef = doc(db, "trips", "bangkok-nye-trip");
 
-var CATS = {
-  sight:{label:"景點 / 一日遊", short:"景點", key:"sight"},
-  food:{label:"餐廳 / 美食", short:"餐廳", key:"food"},
-  bar:{label:"高空酒吧 / 夜生活", short:"酒吧", key:"bar"},
-  mall:{label:"逛街 / Mall", short:"逛街", key:"mall"},
-  market:{label:"夜市", short:"夜市", key:"market"},
-  spa:{label:"按摩 / 放鬆", short:"按摩", key:"spa"},
-  stay:{label:"住宿", short:"住宿", key:"stay"},
-  flight:{label:"機場 / 交通", short:"交通", key:"flight"}
-};
-var CAT_ORDER = ["sight","food","bar","mall","market","spa","stay","flight"];
+/* Built-in categories keep their hand-tuned light/dark CSS variable colors.
+   Anything added via "管理分類" is a custom category: it lives in state.categories
+   (synced through Firestore like everything else) and gets a generated color. */
+var BASE_CAT_DEFS = [
+  {key:"sight", label:"景點 / 一日遊", short:"景點"},
+  {key:"food", label:"餐廳 / 美食", short:"餐廳"},
+  {key:"bar", label:"高空酒吧 / 夜生活", short:"酒吧"},
+  {key:"mall", label:"逛街 / Mall", short:"逛街"},
+  {key:"market", label:"夜市", short:"夜市"},
+  {key:"spa", label:"按摩 / 放鬆", short:"按摩"},
+  {key:"wish", label:"許願池", short:"許願"},
+  {key:"stay", label:"住宿", short:"住宿"},
+  {key:"flight", label:"機場 / 交通", short:"交通"}
+];
+var BASE_CAT_KEYS = BASE_CAT_DEFS.map(function(c){ return c.key; });
+var CATS = {};
+var CAT_ORDER = [];
 var WEEKDAYS = ["日","一","二","三","四","五","六"];
 
+function isBuiltinCategory(key){ return BASE_CAT_KEYS.indexOf(key)>=0; }
+function customCategoryColor(key){
+  var list = state.categories || [];
+  var idx=-1;
+  for(var i=0;i<list.length;i++){ if(list[i].key===key){ idx=i; break; } }
+  if(idx<0) return "hsl(0 0% 55%)";
+  var hue = Math.round((idx * 137.508) % 360); // golden-angle spread, distinct even for many custom cats
+  return "hsl(" + hue + " 48% 42%)";
+}
+function categoryColorCss(key){
+  return isBuiltinCategory(key) ? ("var(--c-"+key+")") : customCategoryColor(key);
+}
+function rebuildCategories(){
+  CATS = {};
+  CAT_ORDER = [];
+  BASE_CAT_DEFS.forEach(function(c){
+    CATS[c.key] = {label:c.label, short:c.short, key:c.key};
+    CAT_ORDER.push(c.key);
+  });
+  (state.categories||[]).forEach(function(c){
+    if(CATS[c.key]) return; // built-in key wins if a custom entry somehow collides
+    CATS[c.key] = {label:c.label, short:c.short||c.label.slice(0,2), key:c.key, custom:true};
+    CAT_ORDER.push(c.key);
+  });
+}
+
 var state = JSON.parse(document.getElementById("state-data").textContent);
+rebuildCategories();
 var uiFilterMembers = [];
 var uiSearch = "";
 var uiActiveCategory = "sight";
@@ -504,7 +571,7 @@ function cardHtml(card, draggable){
     }
   }
   return (
-    '<div class="card'+dim+'" style="border-left-color:var(--c-'+cat.key+')" draggable="'+(draggable?"true":"false")+'" data-card-id="'+card.id+'">' +
+    '<div class="card'+dim+'" style="border-left-color:'+categoryColorCss(cat.key)+'" draggable="'+(draggable?"true":"false")+'" data-card-id="'+card.id+'">' +
       '<div class="card-actions">'+actionsHtml+'</div>' +
       orderControls +
       '<div class="card-top">' +
@@ -538,8 +605,10 @@ function renderSidebar(){
     CAT_ORDER.map(function(key){
       var cat = CATS[key]; var items = byCat[key]||[];
       return '<button class="rail-item'+(uiActiveCategory===key?" active":"")+'" data-railcat="'+key+'">' +
-        '<span class="cat-dot" style="background:var(--c-'+key+')"></span><span>'+esc(cat.short)+'</span><span class="rail-count">'+items.length+'</span></button>';
-    }).join("");
+        '<span class="cat-dot" style="background:'+categoryColorCss(key)+'"></span><span>'+esc(cat.short)+'</span><span class="rail-count">'+items.length+'</span></button>';
+    }).join("") +
+    (isReadOnly? "" : '<button class="rail-item add-cat" id="btn-manage-categories" title="新增或管理分類">' +
+      '<span class="cat-dot" style="background:transparent;border:1px dashed var(--text-faint)"></span><span>＋分類</span></button>');
 
   var panelItems = (uiActiveCategory==="all" ? pool : (byCat[uiActiveCategory]||[])).filter(matchesSearch);
   var panelTitle = uiActiveCategory==="all" ? "全部候選卡片" : CATS[uiActiveCategory].label;
@@ -550,7 +619,7 @@ function renderSidebar(){
   el.innerHTML =
     '<div class="sidebar-head"><h2>候選卡片庫</h2>' + (isReadOnly? "" : '<button class="btn btn-primary btn-sm" id="btn-add-card">+ 新增卡片</button>') + '</div>' +
     '<input class="search-box" id="search-box" type="text" placeholder="搜尋卡片名稱或備註…" value="'+esc(uiSearch)+'">' +
-    '<div class="member-filter-head"><span class="member-filter-label">依成員篩選</span>' + (isReadOnly? "" : '<button class="btn btn-ghost btn-sm" id="btn-manage-members">✎ 管理成員</button>') + '</div>' +
+    '<div class="member-filter-head"><span class="member-filter-label">依成員篩選</span><span style="display:flex;gap:4px;">' + (isReadOnly? "" : '<button class="btn btn-ghost btn-sm" id="btn-manage-flights">✈ 航班</button><button class="btn btn-ghost btn-sm" id="btn-manage-members">✎ 成員</button>') + '</span></div>' +
     '<div class="member-filter">'+memberChips+'</div>' +
     '<div class="sidebar-body">' +
       '<div class="cat-rail">'+railItems+'</div>' +
@@ -595,6 +664,10 @@ function renderSidebar(){
     if(addBtn) addBtn.addEventListener("click", function(){ openCardModal(null); });
     var manageBtn = document.getElementById("btn-manage-members");
     if(manageBtn) manageBtn.addEventListener("click", openMemberModal);
+    var flightBtn = document.getElementById("btn-manage-flights");
+    if(flightBtn) flightBtn.addEventListener("click", openFlightModal);
+    var catBtn = document.getElementById("btn-manage-categories");
+    if(catBtn) catBtn.addEventListener("click", openCategoryModal);
   }
   bindCardActionButtons(el);
   bindDraggableCards(el);
@@ -937,7 +1010,7 @@ function openCardModal(cardId){
     var cat = CATS[k];
     var checked = card ? card.category===k : k==="sight";
     return '<input type="radio" class="cat-radio" name="cat" id="cat-'+k+'" value="'+k+'" '+(checked?"checked":"")+'>' +
-      '<label class="cat-radio-label" for="cat-'+k+'"><span class="cat-dot" style="background:var(--c-'+k+')"></span>'+esc(cat.label)+'</label>';
+      '<label class="cat-radio-label" for="cat-'+k+'"><span class="cat-dot" style="background:'+categoryColorCss(k)+'"></span>'+esc(cat.label)+'</label>';
   }).join("");
   var memberChecks = state.members.map(function(m){
     var checked = card && card.memberIds.indexOf(m.id)>=0;
@@ -1151,6 +1224,136 @@ function openMemberModal(){
   });
 }
 
+function openCategoryModal(){
+  var rows = CAT_ORDER.map(function(key){
+    var cat = CATS[key];
+    if(isBuiltinCategory(key)){
+      return '<div class="cat-row" data-catkey="'+key+'" data-builtin="1">' +
+          '<span class="cat-dot" style="background:'+categoryColorCss(key)+'"></span>' +
+          '<span class="cat-locked-label">'+esc(cat.label)+'　·　基本分類</span>' +
+        '</div>';
+    }
+    return '<div class="cat-row" data-catkey="'+key+'">' +
+        '<span class="cat-dot" style="background:'+categoryColorCss(key)+'"></span>' +
+        '<input type="text" class="member-name-input" value="'+esc(cat.label)+'">' +
+        '<button type="button" class="icon-btn" data-catdel="1" title="移除（這個分類目前的卡片會移回「景點」）">✕</button>' +
+      '</div>';
+  }).join("");
+  var html =
+    '<div class="modal-backdrop" id="modal-backdrop">' +
+      '<div class="modal">' +
+        '<h2>管理分類</h2>' +
+        '<div class="field"><label>目前分類（基本分類無法改名或刪除；自訂分類可以改名／刪除）</label>' +
+          '<div id="cat-rows" style="display:flex;flex-direction:column;gap:8px;">'+rows+'</div>' +
+        '</div>' +
+        '<div class="field"><label>新增分類</label><div style="display:flex;gap:8px;">' +
+          '<input type="text" id="f-new-cat" placeholder="例如：伴手禮" style="flex:1;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:.85rem;">' +
+          '<button type="button" class="btn btn-sm" id="btn-add-cat">加入</button>' +
+        '</div>' +
+        '<div class="empty-note">新分類會出現在候選卡片庫的分類列，新增卡片時也能選它。</div>' +
+        '</div>' +
+        '<div class="modal-actions">' +
+          '<button class="btn" id="btn-cancel-cats">取消</button>' +
+          '<button class="btn btn-primary" id="btn-save-cats">儲存</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  document.getElementById("modal-root").innerHTML = html;
+
+  function bindCatRemoveButtons(){
+    document.querySelectorAll('#cat-rows [data-catdel]').forEach(function(btn){
+      btn.onclick = function(){ btn.closest(".cat-row").remove(); };
+    });
+  }
+  bindCatRemoveButtons();
+
+  document.getElementById("modal-backdrop").addEventListener("click", function(e){ if(e.target.id==="modal-backdrop") closeModal(); });
+  document.getElementById("btn-cancel-cats").addEventListener("click", closeModal);
+  document.getElementById("btn-add-cat").addEventListener("click", function(){
+    var input = document.getElementById("f-new-cat");
+    var v = input.value.trim();
+    if(!v) return;
+    var row = document.createElement("div");
+    row.className = "cat-row";
+    row.setAttribute("data-catkey", "__new__");
+    row.innerHTML = '<span class="cat-dot" style="background:hsl(0 0% 55%)"></span>' +
+      '<input type="text" class="member-name-input" value="'+esc(v)+'">' +
+      '<button type="button" class="icon-btn" data-catdel="1" title="移除">✕</button>';
+    document.getElementById("cat-rows").appendChild(row);
+    input.value = "";
+    input.focus();
+    bindCatRemoveButtons();
+  });
+  document.getElementById("btn-save-cats").addEventListener("click", function(){
+    var rowEls = document.querySelectorAll("#cat-rows .cat-row");
+    var newCustom = [];
+    rowEls.forEach(function(rowEl){
+      if(rowEl.getAttribute("data-builtin")) return;
+      var key = rowEl.getAttribute("data-catkey");
+      var input = rowEl.querySelector(".member-name-input");
+      var label = input ? input.value.trim() : "";
+      if(!label) return;
+      newCustom.push({ key: key==="__new__" ? uid("cat_") : key, label: label, short: label.slice(0,2) });
+    });
+    var oldKeys = (state.categories||[]).map(function(c){ return c.key; });
+    var keptKeys = newCustom.map(function(c){ return c.key; });
+    var removedKeys = oldKeys.filter(function(k){ return keptKeys.indexOf(k)<0; });
+    state.categories = newCustom;
+    if(removedKeys.length){
+      state.cards.forEach(function(c){ if(removedKeys.indexOf(c.category)>=0) c.category = "sight"; });
+    }
+    rebuildCategories();
+    if(uiActiveCategory!=="all" && CAT_ORDER.indexOf(uiActiveCategory)<0) uiActiveCategory = "all";
+    closeModal(); renderAll(); scheduleSave();
+    showToast("分類已更新");
+  });
+}
+
+function openFlightModal(){
+  var rows = state.members.map(function(m){
+    var f = state.flights.find(function(fl){ return fl.memberId===m.id; }) || {};
+    return '<div class="flight-row" data-mid="'+m.id+'">' +
+        '<div class="flight-row-head"><span class="avatar" style="background:'+memberColor(m.id)+'">'+esc(memberInitial(m.name))+'</span>'+esc(m.name)+'</div>' +
+        '<div class="flight-row-grid">' +
+          '<div style="grid-column:1/3;"><label>航空公司</label><input type="text" data-f="airline" value="'+esc(f.airline||"")+'" placeholder="例如：星宇航空"></div>' +
+          '<div><label>抵達日期</label><input type="date" data-f="arrDate" value="'+esc(f.arrDate||"")+'"></div>' +
+          '<div><label>去程航班</label><input type="text" data-f="arrFlight" value="'+esc(f.arrFlight||"")+'" placeholder="例如：JX741 09:25→12:35"></div>' +
+          '<div><label>離開日期</label><input type="date" data-f="depDate" value="'+esc(f.depDate||"")+'"></div>' +
+          '<div><label>回程航班</label><input type="text" data-f="depFlight" value="'+esc(f.depFlight||"")+'" placeholder="例如：JX742 14:50→19:30"></div>' +
+        '</div>' +
+      '</div>';
+  }).join("");
+  var html =
+    '<div class="modal-backdrop" id="modal-backdrop">' +
+      '<div class="modal" style="max-width:520px;">' +
+        '<h2>管理航班</h2>' +
+        '<p class="field-hint">航空公司改班表、改班號都可以直接在這裡更新，存檔後大家看到的日期在場人數會自動跟著調整。整排留白＝這個人先不記錄航班。</p>' +
+        '<div id="flight-rows">'+rows+'</div>' +
+        '<div class="modal-actions">' +
+          '<button class="btn" id="btn-cancel-flights">取消</button>' +
+          '<button class="btn btn-primary" id="btn-save-flights">儲存</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  document.getElementById("modal-root").innerHTML = html;
+  document.getElementById("modal-backdrop").addEventListener("click", function(e){ if(e.target.id==="modal-backdrop") closeModal(); });
+  document.getElementById("btn-cancel-flights").addEventListener("click", closeModal);
+  document.getElementById("btn-save-flights").addEventListener("click", function(){
+    var newFlights = [];
+    document.querySelectorAll("#flight-rows .flight-row").forEach(function(rowEl){
+      var mid = rowEl.getAttribute("data-mid");
+      var vals = {};
+      rowEl.querySelectorAll("[data-f]").forEach(function(inp){ vals[inp.getAttribute("data-f")] = inp.value.trim(); });
+      var allBlank = !vals.airline && !vals.arrDate && !vals.arrFlight && !vals.depDate && !vals.depFlight;
+      if(allBlank) return;
+      newFlights.push({ memberId: mid, airline: vals.airline||"", arrDate: vals.arrDate||"", arrFlight: vals.arrFlight||"", depDate: vals.depDate||"", depFlight: vals.depFlight||"" });
+    });
+    state.flights = newFlights;
+    closeModal(); renderAll(); scheduleSave();
+    showToast("航班資料已更新");
+  });
+}
+
 /* ---------- toast ---------- */
 function showToast(msg){
   var root = document.getElementById("toast-root");
@@ -1170,6 +1373,7 @@ function applyRemoteState(data){
   if(incoming === JSON.stringify(state)) return; // same data delivered again (e.g. our own write's pending->confirmed echo) — nothing to do
   applyingRemote = true;
   state = data;
+  rebuildCategories();
   // Don't yank the board out from under someone mid-edit — the fresh data is
   // already in `state` so save-time lookups see it, but the visual refresh
   // waits until they close the modal (every modal path already calls renderAll()).
