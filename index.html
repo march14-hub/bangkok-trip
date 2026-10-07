@@ -263,7 +263,7 @@ input,select,textarea{font-family:inherit;}
     {"memberId":"m14","airline":"長榮航空","arrDate":"2026-12-30","arrFlight":"BR075 09:40→12:35","depDate":"2027-01-03","depFlight":"BR076 17:15→21:50"}
   ],
   "accommodations": [
-    {"id":"a1","name":"Visunee Mansion","checkin":"2026-12-25","checkout":"2026-12-29","address":"Soi Nai Lert, Pathumwan, Bangkok 10330","note":"BTS Phloen Chit 站步行約5分鐘"},
+    {"id":"a1","name":"曼谷亞洲酒店 Asia Hotel Bangkok","checkin":"2026-12-25","checkout":"2026-12-29","address":"296 Phayathai Road, Ratchathewi, Bangkok 10400","note":"BTS Ratchathewi 站連通｜3間高級雙床房：Kallen+Fiona、Connie+Mel、Arrow"},
     {"id":"a2","name":"Bangrak House","checkin":"2026-12-29","checkout":"2027-01-03","address":"522 Thanon Charoen Wiang, Khet Bang Rak, Bangkok 10500","note":"BTS Saphan Taksin 站步行約150公尺"}
   ],
   "days": [
@@ -271,8 +271,8 @@ input,select,textarea{font-family:inherit;}
     {"id":"2026-12-30"},{"id":"2026-12-31"},{"id":"2027-01-01"},{"id":"2027-01-02"},{"id":"2027-01-03"}
   ],
   "cards": [
-    {"id":"cf1","category":"stay","name":"入住 Visunee Mansion","note":"第一段住宿，12/25–12/29","price":"","address":"Soi Nai Lert, Pathumwan, Bangkok 10330","time":"","mapUrl":"","dayId":"2026-12-25","memberIds":[],"confirmed":true},
-    {"id":"cf2","category":"stay","name":"換宿 Bangrak House","note":"退房 Visunee Mansion → 入住 Bangrak House，12/29–1/3","price":"","address":"522 Thanon Charoen Wiang, Khet Bang Rak, Bangkok 10500","time":"","mapUrl":"","dayId":"2026-12-29","memberIds":[],"confirmed":true},
+    {"id":"cf1","category":"stay","name":"入住 曼谷亞洲酒店 Asia Hotel Bangkok","note":"第一段住宿，12/25–12/29｜BTS Ratchathewi 站連通｜房間：Kallen+Fiona、Connie+Mel、Arrow","price":"","address":"296 Phayathai Road, Ratchathewi, Bangkok 10400","time":"","mapUrl":"","dayId":"2026-12-25","memberIds":[],"confirmed":true},
+    {"id":"cf2","category":"stay","name":"換宿 Bangrak House","note":"退房 Asia Hotel Bangkok → 入住 Bangrak House，12/29–1/3","price":"","address":"522 Thanon Charoen Wiang, Khet Bang Rak, Bangkok 10500","time":"","mapUrl":"","dayId":"2026-12-29","memberIds":[],"confirmed":true},
     {"id":"cf3","category":"bar","name":"跨年晚餐遊船｜河畔嘉年華號","note":"已預訂上層甲板座位，尚未付款。船票通常不可退款，記得盡快確認付款。","price":"฿4,800/人","address":"Riverside Carnival Cruise, Bangkok","time":"21:00–01:00","mapUrl":"","dayId":"2026-12-31","memberIds":[],"confirmed":true},
 
     {"id":"sight-1","category":"sight","name":"死亡鐵路＋桂河大橋一日遊","note":"三種行程可選：地獄之火通道＋午餐／賽佛瑞野生動物園＋北碧夜市／北碧經典一日遊","price":"約 $1,980–2,586","address":"Kanchanaburi, Thailand","time":"","mapUrl":"","dayId":null,"memberIds":[]},
@@ -355,7 +355,7 @@ input,select,textarea{font-family:inherit;}
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+import { getFirestore, doc, onSnapshot, setDoc, runTransaction, collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
 var firebaseConfig = {
   apiKey: "AIzaSyBh5Kn8NMa1qLZRn2eLH17x_LTZb508eTk",
@@ -369,6 +369,7 @@ var firebaseConfig = {
 var fbApp = initializeApp(firebaseConfig);
 var db = getFirestore(fbApp);
 var tripRef = doc(db, "trips", "bangkok-nye-trip");
+var backupsCol = collection(db, "trips", "bangkok-nye-trip", "backups");
 
 /* Built-in categories keep their hand-tuned light/dark CSS variable colors.
    Anything added via "管理分類" is a custom category: it lives in state.categories
@@ -507,7 +508,8 @@ function renderHeader(){
       '<div class="hdr-sub">'+fmtDate(state.trip.start)+' – '+fmtDate(state.trip.end)+'　·　'+state.members.length+' 人　·　'+state.cards.length+' 張候選卡片</div>' +
     '</div>' +
     '<div class="hdr-spacer"></div>' +
-    '<button class="btn btn-ghost btn-sm" id="btn-mode-toggle">'+(isReadOnly?"✎ 我要編輯":"← 回到前台")+'</button>' +
+    (isReadOnly ? "" : '<button class="btn btn-ghost btn-sm" id="btn-history">🕘 版本紀錄</button>') +
+    '<button class="btn btn-ghost btn-sm" id="btn-mode-toggle"'+(remoteReady?'':' disabled title="連上雲端後才能編輯"')+'>'+(isReadOnly?(remoteReady?"✎ 我要編輯":"連線中…"):"← 回到前台")+'</button>' +
     '<div class="status-pill" id="status-pill" data-state="saved"><span class="status-dot"></span><span id="status-text">已同步</span></div>' +
     (isReadOnly ? "" : '<button class="btn btn-ghost btn-sm" id="btn-sidebar-toggle" style="display:none;">卡片庫</button>');
   if(!isReadOnly){
@@ -515,7 +517,11 @@ function renderHeader(){
       document.getElementById("sidebar").classList.toggle("open");
     });
   }
+  if(!isReadOnly){
+    document.getElementById("btn-history").addEventListener("click", openHistoryModal);
+  }
   document.getElementById("btn-mode-toggle").addEventListener("click", function(){
+    if(isReadOnly && !remoteReady){ showToast("還在連線雲端，連上後才能編輯"); return; }
     isReadOnly = !isReadOnly;
     renderAll();
   });
@@ -1365,26 +1371,138 @@ function showToast(msg){
   setTimeout(function(){ if(root.contains(t)) root.removeChild(t); }, 3200);
 }
 
-/* ---------- persistence (Firebase Firestore, shared by every viewer) ---------- */
+/* ---------- persistence (Firebase Firestore, shared by every viewer) ----------
+   1007 安全版：
+   1) 連上雲端之前不能編輯，內建資料只用來先畫畫面，永遠不會被寫回雲端
+   2) 存檔用 transaction 做「三方合併」：只把我這次改到的卡片／欄位套到雲端最新版上，不會整份覆寫別人的修改
+   3) 一次存檔若會讓卡片少掉一半以上，自動擋下
+   4) 自動備份：雲端 backups 子集合（每台裝置最多 10 分鐘一份）＋這台瀏覽器的本機備份（最近 20 版） */
 var applyingRemote = false;
+var remoteReady = false;
+var baseline = null;          // 最後一次確認過的雲端版本
+var saving = false;
+var lastCloudBackupAt = 0;
+var cloudBackupOk = true;
+var LOCAL_BACKUP_KEY = "bkk-trip-backups-v1";
 
+function clone(x){ return x===undefined ? undefined : JSON.parse(JSON.stringify(x)); }
+function same(a,b){ return JSON.stringify(a)===JSON.stringify(b); }
+var KEYED = {members:"id", cards:"id", accommodations:"id", days:"id", categories:"key", flights:"memberId"};
+
+function mergeItem(b, l, r){
+  var out = clone(r);
+  var fields = Object.keys(Object.assign({}, b||{}, l||{}));
+  fields.forEach(function(f){
+    if(!b || !same(l[f], b[f])){
+      if(f in l) out[f] = clone(l[f]); else delete out[f];
+    }
+  });
+  return out;
+}
+function mergeList(base, local, remote, key){
+  base = base||[]; local = local||[]; remote = remote||[];
+  var bm = {}, lm = {}, seen = {}, out = [];
+  base.forEach(function(i){ bm[i[key]] = i; });
+  local.forEach(function(i){ lm[i[key]] = i; });
+  remote.forEach(function(r){
+    var k = r[key], b = bm[k], l = lm[k];
+    seen[k] = 1;
+    if(l===undefined){
+      if(b!==undefined && same(b, r)) return;   // 我刪掉、別人沒動 → 刪
+      out.push(clone(r)); return;                // 別人有改過 → 保留別人的版本
+    }
+    if(b!==undefined && same(l, b)){ out.push(clone(r)); return; } // 我沒動 → 用雲端
+    out.push(b===undefined ? clone(l) : mergeItem(b, l, r));
+  });
+  local.forEach(function(l){
+    var k = l[key];
+    if(seen[k]) return;
+    var b = bm[k];
+    if(b!==undefined && same(l, b)) return;      // 別人刪掉、我沒動 → 刪
+    out.push(clone(l));                          // 我新增的
+  });
+  return out;
+}
+function merge3(base, local, remote){
+  base = base||{}; local = local||{}; remote = remote||{};
+  var out = clone(remote);
+  Object.keys(Object.assign({}, base, local)).forEach(function(k){
+    if(KEYED[k] && Array.isArray(local[k])){
+      out[k] = mergeList(base[k], local[k], remote[k], KEYED[k]);
+    } else if(!same(local[k], base[k])){
+      if(local[k]===undefined) delete out[k]; else out[k] = clone(local[k]);
+    }
+  });
+  return out;
+}
+
+function summarize(d){
+  d = d||{};
+  var cards = d.cards||[];
+  var a1 = (d.accommodations||[])[0];
+  return cards.length+" 張卡片 · "+cards.filter(function(c){ return c.dayId; }).length+" 張已排進日程"+(a1?" · 住宿："+a1.name:"");
+}
+
+/* ---- 備份 ---- */
+function saveLocalBackup(data){
+  try{
+    var list = JSON.parse(localStorage.getItem(LOCAL_BACKUP_KEY)||"[]");
+    var json = JSON.stringify(data);
+    if(list.length && list[0].json===json) return;
+    list.unshift({t:new Date().toISOString(), json:json});
+    localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify(list.slice(0,20)));
+  }catch(e){ /* 私密視窗或空間不足時略過 */ }
+}
+function readLocalBackups(){
+  try{ return JSON.parse(localStorage.getItem(LOCAL_BACKUP_KEY)||"[]"); }catch(e){ return []; }
+}
+function cloudBackup(data, reason, force){
+  if(!force && Date.now()-lastCloudBackupAt < 10*60*1000) return Promise.resolve();
+  lastCloudBackupAt = Date.now();
+  return addDoc(backupsCol, {
+    savedAt: serverTimestamp(),
+    clientTime: new Date().toISOString(),
+    reason: reason||"auto",
+    summary: summarize(data),
+    json: JSON.stringify(data)
+  }).then(function(){ cloudBackupOk = true; }).catch(function(err){
+    cloudBackupOk = false;
+    console.warn("cloud backup failed (Firestore 規則可能不允許 backups 子集合)", err);
+  });
+}
+
+/* ---- 收到雲端資料 ---- */
 function applyRemoteState(data){
-  var incoming = JSON.stringify(data);
-  if(incoming === JSON.stringify(state)) return; // same data delivered again (e.g. our own write's pending->confirmed echo) — nothing to do
-  applyingRemote = true;
-  state = data;
-  rebuildCategories();
-  // Don't yank the board out from under someone mid-edit — the fresh data is
-  // already in `state` so save-time lookups see it, but the visual refresh
-  // waits until they close the modal (every modal path already calls renderAll()).
-  if(!document.getElementById("modal-backdrop")){
+  saveLocalBackup(data);
+  if(!remoteReady){
+    remoteReady = true;
+    baseline = clone(data);
+    state = clone(data);
+    rebuildCategories();
     renderAll();
+    return;
   }
+  var next;
+  if(dirty || saving){
+    next = merge3(baseline, state, data);       // 我還有沒存的修改 → 疊在新的雲端版上
+  } else {
+    next = clone(data);
+  }
+  baseline = clone(data);
+  if(same(next, state)) return;
+  applyingRemote = true;
+  state = next;
+  rebuildCategories();
+  if(!document.getElementById("modal-backdrop")) renderAll();
   applyingRemote = false;
 }
 
 function scheduleSave(){
-  if(applyingRemote) return; // this change came FROM the database, don't write it back
+  if(applyingRemote) return;
+  if(!remoteReady){
+    showToast("還沒連上雲端，這次修改不會儲存");
+    return;
+  }
   dirty = true;
   setStatus("saving","同步中…");
   clearTimeout(saveTimer);
@@ -1392,16 +1510,125 @@ function scheduleSave(){
 }
 
 function doSave(){
-  if(!tripRef){ setStatus("error","尚未連線，稍後會自動重試"); return; }
-  var payload = JSON.parse(JSON.stringify(state));
-  setDoc(tripRef, payload).then(function(){
-    dirty = false;
-    setStatus("saved","已同步");
+  if(!remoteReady){ return; }
+  if(saving){ clearTimeout(saveTimer); saveTimer = setTimeout(doSave, 600); return; }
+  saving = true;
+  var localSnap = clone(state), baseSnap = clone(baseline), preSave = null;
+  runTransaction(db, function(tx){
+    return tx.get(tripRef).then(function(snap){
+      var remote = snap.exists() ? snap.data() : baseSnap;
+      preSave = remote;
+      var merged = merge3(baseSnap, localSnap, remote);
+      var before = (remote.cards||[]).length, after = (merged.cards||[]).length;
+      if(before >= 10 && after < before*0.5){ throw new Error("SAFETY_BLOCK"); }
+      tx.set(tripRef, merged);
+      return merged;
+    });
+  }).then(function(merged){
+    saving = false;
+    cloudBackup(preSave, "before-save");
+    baseline = clone(merged);
+    if(same(state, localSnap)){
+      dirty = false;
+      if(!same(state, merged)){
+        state = clone(merged); rebuildCategories();
+        if(!document.getElementById("modal-backdrop")) renderAll();
+      }
+      setStatus("saved","已同步");
+    } else {
+      state = merge3(localSnap, state, merged);   // 存檔途中又有新修改 → 再存一次
+      saveTimer = setTimeout(doSave, 300);
+    }
   }).catch(function(err){
+    saving = false;
+    if(err && err.message==="SAFETY_BLOCK"){
+      dirty = false;
+      state = clone(baseline); rebuildCategories(); renderAll();
+      setStatus("error","已擋下異常存檔");
+      showToast("這次修改會刪掉一半以上的卡片，已自動擋下。真的要這樣做請用「版本紀錄」。");
+      return;
+    }
     console.error("save failed", err);
     setStatus("error","同步失敗，稍後會自動重試");
     clearTimeout(saveTimer);
     saveTimer = setTimeout(doSave, 3000 + Math.random()*2000);
+  });
+}
+
+/* ---- 版本紀錄＋還原 ---- */
+function fmtTime(iso){
+  var d = new Date(iso);
+  if(isNaN(d)) return iso||"";
+  return (d.getMonth()+1)+"/"+d.getDate()+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+}
+function historyRow(src, idx, time, summary){
+  return '<div style="display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">' +
+      '<div style="flex:1;min-width:0;"><div style="font-weight:600;">'+esc(time)+'　<span style="color:var(--text-faint);font-weight:400;font-size:12px;">'+(src==="cloud"?"雲端備份":"這台瀏覽器")+'</span></div>' +
+      '<div style="font-size:12px;color:var(--text-muted);">'+esc(summary)+'</div></div>' +
+      '<button class="btn btn-sm" data-restore-src="'+src+'" data-restore-idx="'+idx+'">還原</button>' +
+    '</div>';
+}
+function openHistoryModal(){
+  var local = readLocalBackups();
+  var cloud = [];
+  var html =
+    '<div class="modal-backdrop" id="modal-backdrop">' +
+      '<div class="modal" style="max-width:560px;">' +
+        '<h2>版本紀錄</h2>' +
+        '<p class="field-hint">每次存檔前會自動備份。還原會把整個行程板換成那個版本（還原前會先把目前版本再備份一次，按錯也救得回來）。</p>' +
+        '<div id="history-list" style="max-height:55vh;overflow:auto;">讀取中…</div>' +
+        '<div class="modal-actions"><button class="btn" id="btn-close-history">關閉</button></div>' +
+      '</div>' +
+    '</div>';
+  document.getElementById("modal-root").innerHTML = html;
+  document.getElementById("modal-backdrop").addEventListener("click", function(e){ if(e.target.id==="modal-backdrop") closeModal(); });
+  document.getElementById("btn-close-history").addEventListener("click", closeModal);
+
+  function paint(note){
+    var rows = cloud.map(function(b,i){ return historyRow("cloud", i, b.time, b.summary); })
+      .concat(local.map(function(b,i){ var d; try{ d = JSON.parse(b.json); }catch(e){ d = {}; } return historyRow("local", i, fmtTime(b.t), summarize(d)); }));
+    var el = document.getElementById("history-list");
+    if(!el) return;
+    el.innerHTML = (note?'<p class="field-hint">'+esc(note)+'</p>':'') + (rows.length ? rows.join("") : '<p class="field-hint">目前還沒有備份。</p>');
+    el.querySelectorAll("[data-restore-src]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        if(btn.getAttribute("data-armed")!=="1"){
+          btn.setAttribute("data-armed","1"); btn.textContent = "再按一次確認"; btn.classList.add("btn-primary");
+          return;
+        }
+        var src = btn.getAttribute("data-restore-src"), i = +btn.getAttribute("data-restore-idx");
+        var json = src==="cloud" ? cloud[i].json : local[i].json;
+        restoreVersion(JSON.parse(json));
+      });
+    });
+  }
+  getDocs(query(backupsCol, orderBy("savedAt","desc"), limit(30))).then(function(qs){
+    qs.forEach(function(d){
+      var v = d.data();
+      var t = v.savedAt && v.savedAt.toDate ? v.savedAt.toDate().toISOString() : v.clientTime;
+      cloud.push({time: fmtTime(t), summary: v.summary||"", json: v.json});
+    });
+    paint(cloudBackupOk ? "" : "雲端備份目前寫不進去（資料庫規則未開放），下面只有這台瀏覽器自己的備份。");
+  }).catch(function(err){
+    console.warn("read backups failed", err);
+    paint("讀不到雲端備份（資料庫規則未開放），下面只有這台瀏覽器自己的備份。");
+  });
+}
+function restoreVersion(data){
+  setStatus("saving","還原中…");
+  var current = clone(baseline);
+  cloudBackup(current, "before-restore", true).then(function(){
+    return setDoc(tripRef, data);
+  }).then(function(){
+    saveLocalBackup(current);
+    baseline = clone(data); state = clone(data); dirty = false;
+    rebuildCategories(); closeModal(); renderAll();
+    setStatus("saved","已同步");
+    showToast("已還原到選取的版本");
+  }).catch(function(err){
+    console.error("restore failed", err);
+    setStatus("error","還原失敗");
+    showToast("還原失敗，請稍後再試");
   });
 }
 
@@ -1429,14 +1656,14 @@ window.addEventListener("beforeunload", function(e){
 });
 
 document.addEventListener("DOMContentLoaded", function(){
-  renderAll(); // instant paint from the seed data while we connect to the database
+  renderAll(); // 先用內建資料畫畫面（唯讀），連上雲端後換成最新版；內建資料永遠不會寫回雲端
   setStatus("saving","連線中…");
   onSnapshot(tripRef, function(snap){
     if(snap.exists()){
       applyRemoteState(snap.data());
-      setStatus("saved","已同步");
+      if(!dirty && !saving) setStatus("saved","已同步");
     } else {
-      // Nobody has saved anything yet — seed the database with our starter data.
+      // 只有資料庫完全是空的才會用內建資料初始化
       setDoc(tripRef, state).catch(function(err){
         console.error("seed failed", err);
         setStatus("error","初始化資料庫失敗");
