@@ -1385,6 +1385,7 @@ var lastCloudBackupAt = 0;
 var cloudBackupOk = true;
 var LOCAL_BACKUP_KEY = "bkk-trip-backups-v1";
 
+function newSaveId(){ return Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,10); }
 function clone(x){ return x===undefined ? undefined : JSON.parse(JSON.stringify(x)); }
 function same(a,b){ return JSON.stringify(a)===JSON.stringify(b); }
 var KEYED = {members:"id", cards:"id", accommodations:"id", days:"id", categories:"key", flights:"memberId"};
@@ -1521,6 +1522,7 @@ function doSave(){
       var merged = merge3(baseSnap, localSnap, remote);
       var before = (remote.cards||[]).length, after = (merged.cards||[]).length;
       if(before >= 10 && after < before*0.5){ throw new Error("SAFETY_BLOCK"); }
+      merged.saveId = newSaveId();   // 資料庫規則：每次存檔都要帶新的 saveId，舊版程式做不到 → 會被拒絕
       tx.set(tripRef, merged);
       return merged;
     });
@@ -1618,6 +1620,7 @@ function restoreVersion(data){
   setStatus("saving","還原中…");
   var current = clone(baseline);
   cloudBackup(current, "before-restore", true).then(function(){
+    data = clone(data); data.saveId = newSaveId();
     return setDoc(tripRef, data);
   }).then(function(){
     saveLocalBackup(current);
@@ -1664,6 +1667,7 @@ document.addEventListener("DOMContentLoaded", function(){
       if(!dirty && !saving) setStatus("saved","已同步");
     } else {
       // 只有資料庫完全是空的才會用內建資料初始化
+      state.saveId = newSaveId();
       setDoc(tripRef, state).catch(function(err){
         console.error("seed failed", err);
         setStatus("error","初始化資料庫失敗");
