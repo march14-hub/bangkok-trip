@@ -625,7 +625,7 @@ function renderSidebar(){
   el.innerHTML =
     '<div class="sidebar-head"><h2>候選卡片庫</h2>' + (isReadOnly? "" : '<button class="btn btn-primary btn-sm" id="btn-add-card">+ 新增卡片</button>') + '</div>' +
     '<input class="search-box" id="search-box" type="text" placeholder="搜尋卡片名稱或備註…" value="'+esc(uiSearch)+'">' +
-    '<div class="member-filter-head"><span class="member-filter-label">依成員篩選</span><span style="display:flex;gap:4px;">' + (isReadOnly? "" : '<button class="btn btn-ghost btn-sm" id="btn-manage-flights">✈ 航班</button><button class="btn btn-ghost btn-sm" id="btn-manage-members">✎ 成員</button>') + '</span></div>' +
+    '<div class="member-filter-head"><span class="member-filter-label">依成員篩選</span><span style="display:flex;gap:4px;">' + (isReadOnly? "" : '<button class="btn btn-ghost btn-sm" id="btn-manage-flights">✈ 航班</button><button class="btn btn-ghost btn-sm" id="btn-manage-accom">🏨 住宿</button><button class="btn btn-ghost btn-sm" id="btn-manage-members">✎ 成員</button>') + '</span></div>' +
     '<div class="member-filter">'+memberChips+'</div>' +
     '<div class="sidebar-body">' +
       '<div class="cat-rail">'+railItems+'</div>' +
@@ -672,6 +672,8 @@ function renderSidebar(){
     if(manageBtn) manageBtn.addEventListener("click", openMemberModal);
     var flightBtn = document.getElementById("btn-manage-flights");
     if(flightBtn) flightBtn.addEventListener("click", openFlightModal);
+    var accomBtn = document.getElementById("btn-manage-accom");
+    if(accomBtn) accomBtn.addEventListener("click", openAccomModal);
     var catBtn = document.getElementById("btn-manage-categories");
     if(catBtn) catBtn.addEventListener("click", openCategoryModal);
   }
@@ -697,7 +699,7 @@ function renderBoard(){
     var endIdx = days.findIndex(function(d){ return d.id===a.checkout; });
     if(startIdx<0) startIdx=0;
     if(endIdx<0) endIdx=days.length-1;
-    accomHtml += '<div class="accom-bar" style="grid-column:'+(startIdx+1)+' / '+(endIdx+2)+'" title="'+esc(a.name)+' · '+esc(a.note||"")+'">🏨 '+esc(a.name)+'</div>';
+    accomHtml += '<div class="accom-bar" style="grid-column:'+(startIdx+1)+' / '+(endIdx+2)+';cursor:pointer;" title="點一下編輯住宿｜'+esc(a.name)+' · '+esc(a.note||"")+'" data-accom-bar="1">🏨 '+esc(a.name)+'</div>';
   });
 
   var colsHtml = days.map(function(day, idx){
@@ -731,6 +733,7 @@ function renderBoard(){
   var addDayHtml = isReadOnly ? "" : '<div class="addday-col" style="grid-column:'+(days.length+1)+'"><button class="btn" id="btn-add-day">+ 新增天數</button></div>';
 
   grid.innerHTML = accomHtml + colsHtml + addDayHtml;
+  grid.querySelectorAll("[data-accom-bar]").forEach(function(el){ el.addEventListener("click", openAccomModal); });
 
   if(!isReadOnly){
     var addDayBtn = document.getElementById("btn-add-day");
@@ -1357,6 +1360,66 @@ function openFlightModal(){
     state.flights = newFlights;
     closeModal(); renderAll(); scheduleSave();
     showToast("航班資料已更新");
+  });
+}
+
+function openAccomModal(){
+  function rowHtml(a){
+    a = a || {};
+    return '<div class="flight-row accom-edit-row" data-aid="'+esc(a.id||"")+'">' +
+        '<div class="flight-row-head" style="justify-content:space-between;"><span>🏨 住宿</span><button type="button" class="icon-btn" data-accom-del="1" title="刪除這段住宿">✕</button></div>' +
+        '<div class="flight-row-grid">' +
+          '<div style="grid-column:1/3;"><label>飯店名稱</label><input type="text" data-f="name" value="'+esc(a.name||"")+'" placeholder="例如：曼谷亞洲酒店 Asia Hotel Bangkok"></div>' +
+          '<div><label>入住日期</label><input type="date" data-f="checkin" value="'+esc(a.checkin||"")+'"></div>' +
+          '<div><label>退房日期</label><input type="date" data-f="checkout" value="'+esc(a.checkout||"")+'"></div>' +
+          '<div style="grid-column:1/3;"><label>地址</label><input type="text" data-f="address" value="'+esc(a.address||"")+'"></div>' +
+          '<div style="grid-column:1/3;"><label>備註（交通、房間分配…）</label><input type="text" data-f="note" value="'+esc(a.note||"")+'"></div>' +
+        '</div>' +
+      '</div>';
+  }
+  var html =
+    '<div class="modal-backdrop" id="modal-backdrop">' +
+      '<div class="modal" style="max-width:520px;">' +
+        '<h2>管理住宿</h2>' +
+        '<p class="field-hint">這裡的住宿會顯示在行程板最上面的藍色橫條，以及前台每一天的「住宿」資訊。換飯店時直接改這裡。</p>' +
+        '<div id="accom-rows">'+state.accommodations.map(rowHtml).join("")+'</div>' +
+        '<button type="button" class="btn btn-sm" id="btn-add-accom" style="margin-top:6px;">＋ 新增一段住宿</button>' +
+        '<div class="modal-actions">' +
+          '<button class="btn" id="btn-cancel-accom">取消</button>' +
+          '<button class="btn btn-primary" id="btn-save-accom">儲存</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  document.getElementById("modal-root").innerHTML = html;
+  var rowsEl = document.getElementById("accom-rows");
+  function bindDel(root){
+    root.querySelectorAll("[data-accom-del]").forEach(function(btn){
+      btn.onclick = function(){ btn.closest(".accom-edit-row").remove(); };
+    });
+  }
+  bindDel(rowsEl);
+  document.getElementById("btn-add-accom").addEventListener("click", function(){
+    rowsEl.insertAdjacentHTML("beforeend", rowHtml(null));
+    bindDel(rowsEl);
+  });
+  document.getElementById("modal-backdrop").addEventListener("click", function(e){ if(e.target.id==="modal-backdrop") closeModal(); });
+  document.getElementById("btn-cancel-accom").addEventListener("click", closeModal);
+  document.getElementById("btn-save-accom").addEventListener("click", function(){
+    var list = [], bad = "";
+    rowsEl.querySelectorAll(".accom-edit-row").forEach(function(rowEl){
+      var v = {};
+      rowEl.querySelectorAll("[data-f]").forEach(function(inp){ v[inp.getAttribute("data-f")] = inp.value.trim(); });
+      if(!v.name && !v.checkin && !v.checkout && !v.address && !v.note) return;
+      if(!v.name || !v.checkin || !v.checkout){ bad = "每段住宿都要填飯店名稱、入住和退房日期"; return; }
+      if(v.checkout < v.checkin){ bad = "退房日期不能早於入住日期"; return; }
+      var old = state.accommodations.find(function(a){ return a.id===rowEl.getAttribute("data-aid"); }) || {};
+      list.push(Object.assign({}, old, { id: old.id || uid("a"), name: v.name, checkin: v.checkin, checkout: v.checkout, address: v.address, note: v.note }));
+    });
+    if(bad){ showToast(bad); return; }
+    list.sort(function(x,y){ return x.checkin<y.checkin?-1:x.checkin>y.checkin?1:0; });
+    state.accommodations = list;
+    closeModal(); renderAll(); scheduleSave();
+    showToast("住宿資料已更新");
   });
 }
 
