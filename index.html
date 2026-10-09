@@ -1451,6 +1451,9 @@ var LOCAL_BACKUP_KEY = "bkk-trip-backups-v1";
 function newSaveId(){ return Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,10); }
 function clone(x){ return x===undefined ? undefined : JSON.parse(JSON.stringify(x)); }
 function same(a,b){ return JSON.stringify(a)===JSON.stringify(b); }
+// saveId 只是存檔通行碼，不算內容修改：比較內容時忽略它（避免無限存檔迴圈）
+function core(d){ var c = clone(d)||{}; delete c.saveId; return c; }
+function sameCore(a,b){ return same(core(a), core(b)); }
 var KEYED = {members:"id", cards:"id", accommodations:"id", days:"id", categories:"key", flights:"memberId"};
 
 function mergeItem(b, l, r){
@@ -1491,6 +1494,7 @@ function merge3(base, local, remote){
   base = base||{}; local = local||{}; remote = remote||{};
   var out = clone(remote);
   Object.keys(Object.assign({}, base, local)).forEach(function(k){
+    if(k==='saveId') return;   // 一律用雲端的
     if(KEYED[k] && Array.isArray(local[k])){
       out[k] = mergeList(base[k], local[k], remote[k], KEYED[k]);
     } else if(!same(local[k], base[k])){
@@ -1553,7 +1557,7 @@ function applyRemoteState(data){
     next = clone(data);
   }
   baseline = clone(data);
-  if(same(next, state)) return;
+  if(sameCore(next, state)){ state.saveId = data.saveId; return; }
   applyingRemote = true;
   state = next;
   rebuildCategories();
@@ -1593,9 +1597,10 @@ function doSave(){
     saving = false;
     cloudBackup(preSave, "before-save");
     baseline = clone(merged);
-    if(same(state, localSnap)){
+    if(sameCore(state, localSnap)){
       dirty = false;
-      if(!same(state, merged)){
+      state.saveId = merged.saveId;
+      if(!sameCore(state, merged)){
         state = clone(merged); rebuildCategories();
         if(!document.getElementById("modal-backdrop")) renderAll();
       }
