@@ -1733,10 +1733,20 @@ document.addEventListener("DOMContentLoaded", function(){
     if(snap.exists()){
       applyRemoteState(snap.data());
       if(!dirty && !saving) setStatus("saved","已同步");
+    } else if(snap.metadata.fromCache){
+      // 1026 修正：網路不穩/離線時，Firestore 會先丟出「本機快取裡沒有這份文件」的假結果。
+      // 舊版把它當成資料庫是空的 → 用內建資料 setDoc，等網路恢復就把整份雲端蓋回種子資料。
+      // 現在：快取結果一律不初始化，等真正的伺服器回應。
+      setStatus("saving","連線中…");
     } else {
-      // 只有資料庫完全是空的才會用內建資料初始化
-      state.saveId = newSaveId();
-      setDoc(tripRef, state).catch(function(err){
+      // 伺服器確認文件不存在才初始化；再用 transaction 向伺服器確認一次（離線時會直接失敗，不會排隊寫入）
+      runTransaction(db, function(tx){
+        return tx.get(tripRef).then(function(s2){
+          if(s2.exists()) return;
+          var seed = clone(state); seed.saveId = newSaveId();
+          tx.set(tripRef, seed);
+        });
+      }).catch(function(err){
         console.error("seed failed", err);
         setStatus("error","初始化資料庫失敗");
       });
