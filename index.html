@@ -270,7 +270,7 @@ b,strong{font-weight:400;}
 .hero{margin:0 auto;border-radius:22px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow);position:relative;transition:background .3s;}
 .hero svg{display:block;width:100%;height:auto;}
 .hero-text{position:absolute;left:18px;top:14px;}
-.hero-text h1{max-width:5.4em;margin:0;font-size:24px;letter-spacing:.04em;line-height:1.25;}
+.hero-text h1{margin:0;white-space:nowrap;font-size:24px;letter-spacing:.04em;line-height:1.25;}
 .hero-text p{margin:2px 0 0;font-size:13px;color:var(--text-muted);}
 .countdown{display:inline-block;margin-top:8px;background:var(--surface);border:2px solid var(--mango);border-radius:999px;padding:3px 12px;font-size:13px;box-shadow:0 2px 0 var(--mango-soft);}
 .countdown b{font-size:18px;color:#E08A12;margin:0 2px;}
@@ -1096,7 +1096,7 @@ function renderAppView(){
     bindViewSwipe();
   }
   var hero = document.getElementById("view-hero");
-  document.getElementById("hero-title").textContent = state.trip.title;
+  document.getElementById("hero-title").innerHTML = heroTitleHtml(state.trip.title);
   document.getElementById("hero-sub").textContent = fmtDate(state.trip.start)+" – "+fmtDate(state.trip.end)+"・"+state.members.length+" 人";
   document.getElementById("hero-cd").innerHTML = tripCountdownText();
   var main = document.getElementById("view-main");
@@ -1189,6 +1189,12 @@ function renderAppView(){
     var activePill = pillsEl.querySelector(".day-pill.active");
     if(activePill && activePill.scrollIntoView) activePill.scrollIntoView({inline:"center", block:"nearest"});
   }
+}
+// 頂部插圖標題固定斷成兩行：「曼谷跨年」／「共編行程板」（標題裡有換行就照換行）
+function heroTitleHtml(t){
+  t = String(t||"");
+  var parts = t.indexOf("\n")>=0 ? t.split("\n") : (t.length>6 ? [t.slice(0,4), t.slice(4)] : [t]);
+  return parts.map(esc).join("<br>");
 }
 function viewStep(dir){
   var days = sortedDays(), idx = days.findIndex(function(d){ return d.id===uiViewDay; });
