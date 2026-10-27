@@ -1448,7 +1448,9 @@ var lastCloudBackupAt = 0;
 var cloudBackupOk = true;
 var LOCAL_BACKUP_KEY = "bkk-trip-backups-v1";
 
-function newSaveId(){ return Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,10); }
+// 1027：saveId 開頭帶版本號，資料庫規則只接受目前版本 → 還開著舊版分頁的裝置一律寫不進去
+var APP_VER = "v1027";
+function newSaveId(){ return APP_VER + "." + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,10); }
 function clone(x){ return x===undefined ? undefined : JSON.parse(JSON.stringify(x)); }
 function same(a,b){ return JSON.stringify(a)===JSON.stringify(b); }
 // saveId 只是存檔通行碼，不算內容修改：比較內容時忽略它（避免無限存檔迴圈）
@@ -1619,6 +1621,11 @@ function doSave(){
       return;
     }
     console.error("save failed", err);
+    if(err && err.code==="permission-denied"){
+      setStatus("error","版本過舊，請重新整理");
+      showToast("行程板已更新，請重新整理頁面（手機請關掉分頁重開）再編輯");
+      return;
+    }
     setStatus("error","同步失敗，稍後會自動重試");
     clearTimeout(saveTimer);
     saveTimer = setTimeout(doSave, 3000 + Math.random()*2000);
