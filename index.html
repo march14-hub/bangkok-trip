@@ -184,6 +184,10 @@ input,select,textarea{font-family:inherit;}
 .modal-actions{display:flex;gap:8px;margin-top:16px;}
 .modal-actions .btn-primary{flex:1;justify-content:center;}
 
+/* 1028 手機卡片庫：收起按鈕＋點外面關閉 */
+.sidebar-close{display:none !important;}
+#sidebar-scrim{display:none;position:fixed;inset:0;z-index:39;background:rgba(40,30,20,.28);}
+
 /* toast */
 #toast-root{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:60;}
 .toast{background:var(--text);color:var(--bg);font-size:.8rem;padding:9px 16px;border-radius:999px;box-shadow:var(--shadow);}
@@ -192,6 +196,8 @@ input,select,textarea{font-family:inherit;}
   #btn-sidebar-toggle{display:inline-flex !important;}
   #sidebar{position:fixed;left:0;top:0;bottom:0;z-index:40;width:88vw;max-width:360px;transform:translateX(-100%);transition:transform .2s;box-shadow:var(--shadow);}
   #sidebar.open{transform:translateX(0);}
+  .sidebar-close{display:inline-flex !important;}
+  #sidebar-scrim.show{display:block;}
   .hdr-sub{display:none;}
   .hdr-title{font-size:1.1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60vw;}
   .modal{padding:16px;}
@@ -856,13 +862,14 @@ function renderHeader(){
     (isReadOnly ? "" : '<button class="btn btn-sm" id="btn-sidebar-toggle" style="display:none;">卡片庫</button>');
   if(!isReadOnly){
     document.getElementById("btn-sidebar-toggle").addEventListener("click", function(){
-      document.getElementById("sidebar").classList.toggle("open");
+      setSidebarOpen(!document.getElementById("sidebar").classList.contains("open"));
     });
     document.getElementById("btn-history").addEventListener("click", openHistoryModal);
   }
   document.getElementById("btn-mode-toggle").addEventListener("click", function(){
     if(isReadOnly && !remoteReady){ showToast("還在連線雲端，連上後才能編輯"); return; }
     isReadOnly = !isReadOnly;
+    setSidebarOpen(false);
     renderAll();
     window.scrollTo(0,0);
   });
@@ -926,6 +933,21 @@ function setStatus(state_, text){
   document.getElementById("status-text").textContent = text;
 }
 
+/* ---------- 手機卡片庫開關 ---------- */
+function setSidebarOpen(open){
+  var sb = document.getElementById("sidebar");
+  if(!sb) return;
+  var scrim = document.getElementById("sidebar-scrim");
+  if(!scrim){
+    scrim = document.createElement("div");
+    scrim.id = "sidebar-scrim";
+    scrim.addEventListener("click", function(){ setSidebarOpen(false); });
+    sb.parentNode.insertBefore(scrim, sb);   // 放在卡片庫旁邊，確保層級在卡片庫下面
+  }
+  sb.classList.toggle("open", !!open);
+  scrim.classList.toggle("show", !!open && window.innerWidth <= 760);
+}
+
 /* ---------- render: sidebar ---------- */
 function renderSidebar(){
   var el = document.getElementById("sidebar");
@@ -957,7 +979,7 @@ function renderSidebar(){
     : '<div class="empty-note">這個分類目前沒有符合的卡片</div>';
 
   el.innerHTML =
-    '<div class="sidebar-head"><h2>候選卡片庫</h2>' + (isReadOnly? "" : '<button class="btn btn-primary btn-sm" id="btn-add-card">+ 新增卡片</button>') + '</div>' +
+    '<div class="sidebar-head"><h2>候選卡片庫</h2><span style="display:flex;gap:6px;align-items:center;">' + (isReadOnly? "" : '<button class="btn btn-primary btn-sm" id="btn-add-card">+ 新增卡片</button>') + '<button class="btn btn-sm sidebar-close" id="btn-sidebar-close" aria-label="收起卡片庫">✕ 收起</button></span></div>' +
     '<input class="search-box" id="search-box" type="text" placeholder="搜尋卡片名稱或備註…" value="'+esc(uiSearch)+'">' +
     '<div class="member-filter-head"><span class="member-filter-label">誰想去（點頭像篩選）</span><span style="display:flex;gap:4px;">' + (isReadOnly? "" : '<button class="btn btn-sm" id="btn-manage-flights">'+ICON.plane.replace('width="22" height="22"','width="14" height="14"')+'航班</button><button class="btn btn-sm" id="btn-manage-accom">'+ICON.houseSm.replace('width="20" height="20"','width="14" height="14"')+'住宿</button><button class="btn btn-sm" id="btn-manage-members">'+PEOPLE_SVG+'成員</button>') + '</span></div>' +
     '<div class="member-filter">'+memberChips+'</div>' +
@@ -999,6 +1021,8 @@ function renderSidebar(){
       renderSidebar();
     });
   });
+  var closeBtn = document.getElementById("btn-sidebar-close");
+  if(closeBtn) closeBtn.addEventListener("click", function(){ setSidebarOpen(false); });
   if(!isReadOnly){
     var addBtn = document.getElementById("btn-add-card");
     if(addBtn) addBtn.addEventListener("click", function(){ openCardModal(null); });
@@ -1298,7 +1322,12 @@ function bindCardMoveSelects(root){
       var id = sel.getAttribute("data-move-id");
       var dayId = sel.value || null;
       var insertIdx = dayId ? cardsForDay(dayId).length : poolCards().filter(function(c){ return c.id!==id; }).length;
+      var fromSidebar = !!sel.closest("#sidebar");
       moveCard(id, dayId, insertIdx);
+      if(fromSidebar && dayId && window.innerWidth <= 760){
+        setSidebarOpen(false);
+        showToast("已排入 " + fmtDate(dayId));
+      }
     });
   });
 }
