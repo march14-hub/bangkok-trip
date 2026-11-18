@@ -872,6 +872,7 @@ function renderHeader(){
     setSidebarOpen(false);
     renderAll();
     window.scrollTo(0,0);
+    if(!isReadOnly) resumeCardDraftIfAny();
   });
 }
 
@@ -1429,6 +1430,62 @@ function bindCardActionButtons(root){
 
 /* ---------- modals ---------- */
 function closeModal(){ document.getElementById("modal-root").innerHTML = ""; }
+/* 1118 修正：點外面關視窗的保護
+   - 以前：在輸入框裡拖曳選字、放開時滑到外面，或手機點外面想收鍵盤 → 整個視窗被關掉、內容消失
+   - 現在：按下與放開都在灰色區域才算「點外面」；表單已經有改動就不關，只提醒 */
+function formSnapshot(root){
+  return Array.prototype.map.call(root.querySelectorAll("input,textarea,select"), function(el){
+    return (el.type==="checkbox"||el.type==="radio") ? (el.checked?"1":"0") : el.value;
+  }).join("\u0001");
+}
+function modalIsDirty(){
+  var bd = document.getElementById("modal-backdrop");
+  return !!(bd && bd._snap!=null && formSnapshot(bd)!==bd._snap);
+}
+function bindBackdrop(){
+  var bd = document.getElementById("modal-backdrop"); if(!bd) return;
+  bd._snap = formSnapshot(bd);
+  var downOnBd = false;
+  bd.addEventListener("pointerdown", function(e){ downOnBd = (e.target===bd); });
+  bd.addEventListener("click", function(e){
+    if(e.target!==bd || !downOnBd) return;
+    downOnBd = false;
+    if(modalIsDirty()){ showToast("還沒儲存喔！要存請按「儲存」，不要了請按「取消」"); return; }
+    closeModal();
+  });
+}
+/* 卡片草稿：每打一個字就暫存在這台裝置，手機切去 Google Map 再回來、頁面被重新載入也不會不見 */
+var CARD_DRAFT_KEY = "bkk-card-draft";
+function readCardDraft(){
+  try{ var d = JSON.parse(localStorage.getItem(CARD_DRAFT_KEY)||"null");
+    if(d && Date.now()-d.at < 3*86400000) return d; }catch(e){}
+  return null;
+}
+function clearCardDraft(){ try{ localStorage.removeItem(CARD_DRAFT_KEY); }catch(e){} }
+function collectCardFields(){
+  return {
+    cat: (document.querySelector('input[name="cat"]:checked')||{}).value || "",
+    name: document.getElementById("f-name").value, note: document.getElementById("f-note").value,
+    price: document.getElementById("f-price").value, time: document.getElementById("f-time").value,
+    address: document.getElementById("f-address").value, mapurl: document.getElementById("f-mapurl").value,
+    automap: document.getElementById("f-automap").checked, day: document.getElementById("f-day").value,
+    members: Array.prototype.map.call(document.querySelectorAll(".member-check:checked"), function(el){ return el.value; })
+  };
+}
+function fillCardFields(f){
+  if(f.cat){ var r = document.getElementById("cat-"+f.cat); if(r) r.checked = true; }
+  ["name","note","price","time","address","mapurl"].forEach(function(k){ if(f[k]!=null) document.getElementById("f-"+k).value = f[k]; });
+  document.getElementById("f-automap").checked = !!f.automap;
+  document.getElementById("f-mapurl").style.display = f.automap ? "none" : "block";
+  var daySel = document.getElementById("f-day");
+  if(f.day!=null && Array.prototype.some.call(daySel.options, function(o){ return o.value===f.day; })) daySel.value = f.day;
+  Array.prototype.forEach.call(document.querySelectorAll(".member-check"), function(el){ el.checked = (f.members||[]).indexOf(el.value)>=0; });
+}
+function resumeCardDraftIfAny(){
+  var d = readCardDraft(); if(!d) return;
+  if(d.cardId && !state.cards.some(function(c){ return c.id===d.cardId; })){ clearCardDraft(); return; }
+  openCardModal(d.cardId||null);
+}
 
 function openCardModal(cardId){
   editingCardId = cardId;
@@ -1477,13 +1534,27 @@ function openCardModal(cardId){
   autoMap.addEventListener("change", function(){ mapUrlField.style.display = autoMap.checked ? "none" : "block"; });
   if(card && card.mapUrl){ autoMap.checked=false; mapUrlField.style.display="block"; }
 
-  document.getElementById("modal-backdrop").addEventListener("click", function(e){ if(e.target.id==="modal-backdrop") closeModal(); });
-  document.getElementById("btn-cancel-card").addEventListener("click", closeModal);
+  bindBackdrop();   // 先記下「原本的樣子」，之後才判斷有沒有改過
+  var draft = readCardDraft();
+  if(draft && (draft.cardId||null)===(cardId||null)){
+    fillCardFields(draft.fields);
+    showToast("已幫你恢復上次還沒儲存的內容");
+  }
+  var modalEl = document.querySelector("#modal-backdrop .modal");
+  function saveDraft(){
+    try{ localStorage.setItem(CARD_DRAFT_KEY, JSON.stringify({cardId:cardId||null, at:Date.now(), fields:collectCardFields()})); }catch(e){}
+  }
+  modalEl.addEventListener("input", saveDraft);
+  modalEl.addEventListener("change", saveDraft);
+  document.getElementById("btn-cancel-card").addEventListener("click", function(){
+    if(modalIsDirty() && !confirm("這張卡片還沒儲存，確定要放棄嗎？")) return;
+    clearCardDraft(); closeModal();
+  });
   var delBtn = document.getElementById("btn-delete-card");
   if(delBtn) delBtn.addEventListener("click", function(){
     if(!confirm("確定要刪除這張卡片嗎？")) return;
     state.cards = state.cards.filter(function(c){ return c.id!==cardId; });
-    closeModal(); renderAll(); scheduleSave();
+    clearCardDraft(); closeModal(); renderAll(); scheduleSave();
   });
   document.getElementById("btn-save-card").addEventListener("click", function(){
     var name = document.getElementById("f-name").value.trim();
@@ -1519,7 +1590,7 @@ function openCardModal(cardId){
       newCard.order = sibs2.length;
       state.cards.push(newCard);
     }
-    closeModal(); renderAll(); scheduleSave();
+    clearCardDraft(); closeModal(); renderAll(); scheduleSave();
   });
 }
 
@@ -1544,7 +1615,7 @@ function openDayModal(editDayId){
       '</div>' +
     '</div>';
   document.getElementById("modal-root").innerHTML = html;
-  document.getElementById("modal-backdrop").addEventListener("click", function(e){ if(e.target.id==="modal-backdrop") closeModal(); });
+  bindBackdrop();
   document.getElementById("btn-cancel-day").addEventListener("click", closeModal);
   var delBtn = document.getElementById("btn-delete-day");
   if(delBtn) delBtn.addEventListener("click", function(){
@@ -1609,7 +1680,7 @@ function openMemberModal(){
   }
   bindRemoveButtons();
 
-  document.getElementById("modal-backdrop").addEventListener("click", function(e){ if(e.target.id==="modal-backdrop") closeModal(); });
+  bindBackdrop();
   document.getElementById("btn-cancel-members").addEventListener("click", closeModal);
   document.getElementById("btn-add-member").addEventListener("click", function(){
     var input = document.getElementById("f-new-member");
@@ -1694,7 +1765,7 @@ function openCategoryModal(){
   }
   bindCatRemoveButtons();
 
-  document.getElementById("modal-backdrop").addEventListener("click", function(e){ if(e.target.id==="modal-backdrop") closeModal(); });
+  bindBackdrop();
   document.getElementById("btn-cancel-cats").addEventListener("click", closeModal);
   document.getElementById("btn-add-cat").addEventListener("click", function(){
     var input = document.getElementById("f-new-cat");
@@ -1763,7 +1834,7 @@ function openFlightModal(){
       '</div>' +
     '</div>';
   document.getElementById("modal-root").innerHTML = html;
-  document.getElementById("modal-backdrop").addEventListener("click", function(e){ if(e.target.id==="modal-backdrop") closeModal(); });
+  bindBackdrop();
   document.getElementById("btn-cancel-flights").addEventListener("click", closeModal);
   document.getElementById("btn-save-flights").addEventListener("click", function(){
     var newFlights = [];
@@ -1820,7 +1891,7 @@ function openAccomModal(){
     rowsEl.insertAdjacentHTML("beforeend", rowHtml(null));
     bindDel(rowsEl);
   });
-  document.getElementById("modal-backdrop").addEventListener("click", function(e){ if(e.target.id==="modal-backdrop") closeModal(); });
+  bindBackdrop();
   document.getElementById("btn-cancel-accom").addEventListener("click", closeModal);
   document.getElementById("btn-save-accom").addEventListener("click", function(){
     var list = [], bad = "";
@@ -2076,7 +2147,7 @@ function openHistoryModal(){
       '</div>' +
     '</div>';
   document.getElementById("modal-root").innerHTML = html;
-  document.getElementById("modal-backdrop").addEventListener("click", function(e){ if(e.target.id==="modal-backdrop") closeModal(); });
+  bindBackdrop();
   document.getElementById("btn-close-history").addEventListener("click", closeModal);
 
   function paint(note){
@@ -2148,7 +2219,7 @@ window.addEventListener("resize", function(){
 });
 
 window.addEventListener("beforeunload", function(e){
-  if(dirty){ e.preventDefault(); e.returnValue = ""; }
+  if(dirty || modalIsDirty()){ e.preventDefault(); e.returnValue = ""; }
 });
 
 document.addEventListener("DOMContentLoaded", function(){
