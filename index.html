@@ -1941,7 +1941,16 @@ var LOCAL_BACKUP_KEY = "bkk-trip-backups-v1";
 var APP_VER = "v1027";
 function newSaveId(){ return APP_VER + "." + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,10); }
 function clone(x){ return x===undefined ? undefined : JSON.parse(JSON.stringify(x)); }
-function same(a,b){ return JSON.stringify(a)===JSON.stringify(b); }
+/* 1119 修正：比較內容時忽略欄位順序。雲端回傳的欄位順序和本機不一定一樣，
+   以前會被誤判成「別人改過這張卡」→ 刪除被合併邏輯救回來，卡片刪不掉 */
+function stableStr(x){
+  if(Array.isArray(x)) return "["+x.map(stableStr).join(",")+"]";
+  if(x && typeof x==="object"){
+    return "{"+Object.keys(x).filter(function(k){ return x[k]!==undefined; }).sort().map(function(k){ return JSON.stringify(k)+":"+stableStr(x[k]); }).join(",")+"}";
+  }
+  return JSON.stringify(x===undefined?null:x);
+}
+function same(a,b){ return stableStr(a)===stableStr(b); }
 // saveId 只是存檔通行碼，不算內容修改：比較內容時忽略它（避免無限存檔迴圈）
 function core(d){ var c = clone(d)||{}; delete c.saveId; return c; }
 function sameCore(a,b){ return same(core(a), core(b)); }
